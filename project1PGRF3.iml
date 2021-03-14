@@ -10,5 +10,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="lwjgl-assimp-javadoc" level="application" />
+    <orderEntry type="library" exported="" name="lwjgl-assimp-javadoc" level="project" />
   </component>
 </module>

@@ -7,6 +7,7 @@ import transforms.Camera;
 import transforms.Mat4PerspRH;
 import transforms.Vec3D;
 
+import java.awt.*;
 import java.io.IOException;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -42,7 +43,7 @@ public class Renderer extends AbstractRenderer {
         OGLUtils.shaderCheck();
 
         glClearColor(0.1f, 0.1f, 0.1f, 1f);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
 
         shaderProgramMain = ShaderUtils.loadProgram("/main");
         viewLocation = glGetUniformLocation(shaderProgramMain, "view");
@@ -74,8 +75,12 @@ public class Renderer extends AbstractRenderer {
 //        };
 //        buffers = new OGLBuffers(vertexBufferData, attributes, indexBufferData);
 
-        buffersMain = GridFactory.generateGrid(50, 50);
-        buffersPost = GridFactory.generateGrid(2, 2);
+//        buffersMain = GridFactory.generateGrid(50, 50);
+//        buffersPost = GridFactory.generateGrid(2, 2);
+
+
+        buffersMain = TriangleFactory.generateTriangle(10,10);
+        buffersPost = TriangleFactory.generateTriangle(3, 3);
 
         renderTarget = new OGLRenderTarget(1024, 1024);
 
@@ -95,7 +100,7 @@ public class Renderer extends AbstractRenderer {
         // text-renderer disables depth-test (z-buffer)
 
         renderMain();
-        renderPostProcessing();
+       renderPostProcessing();
 
         glDisable(GL_DEPTH_TEST);
         viewer.view(textureMosaic, -1, -1, 0.5);
@@ -116,9 +121,9 @@ public class Renderer extends AbstractRenderer {
         textureMosaic.bind(shaderProgramMain, "textureMosaic", 0);
 
         glUniform1f(typeLocation, 0f);
-        buffersMain.draw(GL_TRIANGLES, shaderProgramMain);
+        buffersMain.draw(GL_TRIANGLE_STRIP, shaderProgramMain);
         glUniform1f(typeLocation, 1f);
-        buffersMain.draw(GL_TRIANGLES, shaderProgramMain);
+        buffersMain.draw(GL_TRIANGLE_STRIP, shaderProgramMain);
     }
 
     private void renderPostProcessing() {
@@ -128,7 +133,7 @@ public class Renderer extends AbstractRenderer {
         glViewport(0, 0, width, height); // must reset back - render target is setting its own viewport
 
         renderTarget.getColorTexture().bind(shaderProgramPost, "textureRendered", 0);
-        buffersPost.draw(GL_TRIANGLES, shaderProgramPost);
+        buffersPost.draw(GL_TRIANGLE_STRIP, shaderProgramPost);
     }
 
     private final GLFWCursorPosCallback cursorPosCallback = new GLFWCursorPosCallback() {
@@ -166,5 +171,7 @@ public class Renderer extends AbstractRenderer {
     public GLFWMouseButtonCallback getMouseCallback() {
         return mouseButtonCallback;
     }
+
+
 
 }

@@ -4,53 +4,61 @@ import lwjglutils.OGLBuffers;
 
 
 public class TriangleFactory {
-    private static int offset = 0;
 
     static OGLBuffers generateTriangle(int m, int n) {
 
 
-        float[] vb = new float[m * n * 2 * 3];
+        float[] vb = new float[(m * n) * 2];
         int index = 0;
 
 
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < m; j++) {
 
-                vb[index++] = j / (float) (m);
-                vb[index++] = i / (float) (n);
+                vb[index++] = j / (float) (m - 1);
+                vb[index++] = i / (float) (n - 1);
 
             }
         }
 
 
-        int[] ib = new int[2* m * (n)];//počet prvků index bufferu 2*m(n-1)
+        int[] ib = new int[2 * (m * (n))];//počet prvků index bufferu 2 *( m * n)
         int index2 = 0;
 
-        /**
-         * funkcni pro prvni hodnoty
-         */
-        for (int y = 0; y < n - 1; y++) {
-            if (y > 0) {
-                // Degenerate begin: repeat first vertex
-                //heightMapIndexData[offset++]= ((y * n));
-                ib[index2++] = ((y * n));
-                System.out.println(((y * n)));
+        for (int k = 0; k < (n - 1); k++) {
+
+            if (index % 2 == 0) {//sudý průchod
+
+                for (int x = 0; x < m; x++) {
+                    ib[index2++] = ((k * n) + x);
+                    ib[index2++] = (((k + 1) * n) + x);
+                }
+                index++;
+
+                if (k < n - 2) {
+                    // Degener. pravá
+                    ib[index2++] = (((k + 1) * n) + (m - 1));
+                    ib[index2++] = (((k + 1) * n) + (m - 1));
+                }
+            } else if (index % 2 != 0) {
+                for (int x = 0; x < m; x++) {//lichý průchod
+                    ib[index2++] = ((((k + 1) * n) - x) + (n - 1));
+                    ib[index2++] = (((k * n) - x) + (n - 1));
+
+                }
+                index++;
+                if (k < n - 2) {
+                    // Degener. levá
+                    ib[index2++] = (((k) * n) + (m));
+                    ib[index2++] = (((k) * n) + (m));
+
+                }
+
             }
 
-            for (int x = 0; x < m; x++) {
-                // One part of the strip
-                ib[index2++] = (((y * n) + x));
-                ib[index2++] = ((((y + 1) * n) + x));
-                System.out.println((y * n) + x);
-                System.out.println((((y + 1) * n) + x));
-            }
 
-            if (y < n - 2) {
-                // Degenerate end: repeat last vertex
-                ib[index2++] = ((((y + 1) * n) + (m - 1)));
-                System.out.println((((y + 1) * n) + (m - 1)));
-            }
         }
+
 
         OGLBuffers.Attrib[] attributes = {
                 new OGLBuffers.Attrib("inPosition", 2)

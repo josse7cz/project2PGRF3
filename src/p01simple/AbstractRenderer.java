@@ -142,4 +142,5 @@ public abstract class AbstractRenderer {
         return scrollCallback;
     }
 
+    public abstract GLFWKeyCallback glfwSetKeyCallback();
 }

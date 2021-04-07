@@ -2,18 +2,20 @@ package p01simple;
 //package lvl2advanced.p01gui.p01simple;
 
 import lwjglutils.*;
-import org.lwjgl.glfw.*;
+import org.lwjgl.glfw.GLFWCursorPosCallback;
+import org.lwjgl.glfw.GLFWKeyCallback;
+import org.lwjgl.glfw.GLFWMouseButtonCallback;
 import transforms.Camera;
 import transforms.Mat4PerspRH;
 import transforms.Vec3D;
 
-import java.awt.*;
 import java.io.IOException;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.opengl.GL30.*;
+import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
+import static org.lwjgl.opengl.GL30.glBindFramebuffer;
 
 /**
  * @author PGRF FIM UHK
@@ -79,8 +81,8 @@ public class Renderer extends AbstractRenderer {
 //        buffersPost = GridFactory.generateGrid(2, 2);
 
 
-        buffersMain = TriangleFactory.generateTriangle(10,10);
-        buffersPost = TriangleFactory.generateTriangle(3, 3);
+        buffersMain = TriangleFactory.generateTriangle(50,50);
+        buffersPost = TriangleFactory.generateTriangle(5, 5);
 
         renderTarget = new OGLRenderTarget(1024, 1024);
 
@@ -131,7 +133,6 @@ public class Renderer extends AbstractRenderer {
         glBindFramebuffer(GL_FRAMEBUFFER, 0); // render to window
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, width, height); // must reset back - render target is setting its own viewport
-
         renderTarget.getColorTexture().bind(shaderProgramPost, "textureRendered", 0);
         buffersPost.draw(GL_TRIANGLE_STRIP, shaderProgramPost);
     }
@@ -171,6 +172,13 @@ public class Renderer extends AbstractRenderer {
     public GLFWMouseButtonCallback getMouseCallback() {
         return mouseButtonCallback;
     }
+
+
+    public GLFWKeyCallback glfwSetKeyCallback(){return keyCallback;}
+
+  ;
+
+
 
 
 

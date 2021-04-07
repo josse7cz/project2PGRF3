@@ -27,17 +27,9 @@ class GridFactory {
         for (int i = 0; i < n - 1; i++) {
             int rowOffset = i * m;
             for (int j = 0; j < m - 1; j++) {
-//                System.out.println(j + rowOffset);
-//                System.out.println(j + m + rowOffset);
-//                System.out.println(j + 1 + rowOffset);
-//                System.out.println(j + 1 + rowOffset);
-//                System.out.println(j + m + rowOffset);
-//                System.out.println(j + m + 1 + rowOffset);
-
                 ib[index2++] = j + rowOffset;
                 ib[index2++] = j + m + rowOffset;
                 ib[index2++] = j + 1 + rowOffset;
-
                 ib[index2++] = j + 1 + rowOffset;
                 ib[index2++] = j + m + rowOffset;
                 ib[index2++] = j + m + 1 + rowOffset;

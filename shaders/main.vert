@@ -17,10 +17,10 @@ vec3 getSphere(vec2 vec) {
 	float az = vec.x * PI; // <-1;1> -> <-PI;PI>
 	float ze = vec.y * PI / 2.0; // <-1;1> -> <-PI/2;PI/2>
 	float r = 1.0;
-
 	float x = r * cos(az) * cos(ze);
 	float y = 2 * r * sin(az) * cos(ze);
 	float z = 0.5 * r * sin(ze);
+
 	return vec3(x, y, z);
 }
 

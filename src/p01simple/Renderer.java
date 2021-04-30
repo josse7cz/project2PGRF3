@@ -5,6 +5,7 @@ import lwjglutils.*;
 import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.glfw.GLFWMouseButtonCallback;
+import org.lwjgl.glfw.GLFWScrollCallback;
 import transforms.Camera;
 import transforms.Mat4PerspRH;
 import transforms.Vec3D;
@@ -45,7 +46,8 @@ public class Renderer extends AbstractRenderer {
         OGLUtils.shaderCheck();
 
         glClearColor(0.1f, 0.1f, 0.1f, 1f);
-        glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
         shaderProgramMain = ShaderUtils.loadProgram("/main");
         viewLocation = glGetUniformLocation(shaderProgramMain, "view");
@@ -55,7 +57,7 @@ public class Renderer extends AbstractRenderer {
         shaderProgramPost = ShaderUtils.loadProgram("/post");
 
         camera = new Camera()
-                .withPosition(new Vec3D(3, 3, 2))
+                .withPosition(new Vec3D(5, 5, 2))//oddálení, přiblizeni
                 .withAzimuth(5 / 4f * Math.PI)
                 .withZenith(-1 / 5f * Math.PI);
 
@@ -66,24 +68,9 @@ public class Renderer extends AbstractRenderer {
                 20
         );
 
-//        float[] vertexBufferData = {
-//                -1, -1,
-//                1, 0,
-//                0, 1,
-//        };
-//        int[] indexBufferData = {0, 1, 2};
-//        OGLBuffers.Attrib[] attributes = {
-//                new OGLBuffers.Attrib("inPosition", 2),
-//        };
-//        buffers = new OGLBuffers(vertexBufferData, attributes, indexBufferData);
 
-//        buffersMain = GridFactory.generateGrid(50, 50);
-//        buffersPost = GridFactory.generateGrid(2, 2);
-
-
-        buffersMain = TriangleFactory.generateTriangle(50,50);
-        buffersPost = TriangleFactory.generateTriangle(5, 5);
-
+        buffersMain = TriangleFactory.generateTriangle(50, 50);
+        buffersPost = TriangleFactory.generateTriangle(2, 2);
         renderTarget = new OGLRenderTarget(1024, 1024);
 
         try {
@@ -102,13 +89,14 @@ public class Renderer extends AbstractRenderer {
         // text-renderer disables depth-test (z-buffer)
 
         renderMain();
-       renderPostProcessing();
+        renderPostProcessing();
 
         glDisable(GL_DEPTH_TEST);
         viewer.view(textureMosaic, -1, -1, 0.5);
         viewer.view(renderTarget.getColorTexture(), -1, -0.5, 0.5);
         viewer.view(renderTarget.getDepthTexture(), -1, 0, 0.5);
         textRenderer.addStr2D(width - 90, height - 3, " (c) PGRF UHK");
+        textRenderer.addStr2D(2, 20, " Návod pro použítí");
     }
 
     private void renderMain() {
@@ -122,9 +110,12 @@ public class Renderer extends AbstractRenderer {
 
         textureMosaic.bind(shaderProgramMain, "textureMosaic", 0);
 
-        glUniform1f(typeLocation, 0f);
+        /*
+        objekty
+         */
+        glUniform1f(typeLocation, 0f);//dalsi objekt
         buffersMain.draw(GL_TRIANGLE_STRIP, shaderProgramMain);
-        glUniform1f(typeLocation, 1f);
+        glUniform1f(typeLocation, 1.5f);
         buffersMain.draw(GL_TRIANGLE_STRIP, shaderProgramMain);
     }
 
@@ -160,8 +151,61 @@ public class Renderer extends AbstractRenderer {
                 oldMy = yPos[0];
                 mousePressed = action == GLFW_PRESS;
             }
+            if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+                double[] il=new double[1];
+                double[] ik=new double[1];
+                glfwGetCursorPos(window, il,ik);
+
+                System.out.println("mouse right dodelat na rotaci");
+            }
         }
     };
+    /*
+    metoda pro priblizeni koleckem mysi
+     */
+    private final GLFWScrollCallback scrollCallback = new GLFWScrollCallback() {
+        @Override
+        public void invoke(long window, double xoffset, double yoffset) {
+            camera = camera.forward(xoffset);
+            camera = camera.backward(yoffset);
+        }
+    };
+    /*
+    metoda pro zpracovani vstupu z klavesnice
+     */
+    private final GLFWKeyCallback keyCallback = new GLFWKeyCallback() {
+        @Override
+        public void invoke(long window, int key, int scancode, int action, int mods) {
+            double speed = 0.25;
+            switch (key) {
+                case GLFW_KEY_W:
+                    camera = camera.down(speed);
+                    break;
+                case GLFW_KEY_S:
+                    camera = camera.up(speed);
+                    break;
+                case GLFW_KEY_A:
+                    camera = camera.right(speed);
+                    break;
+                case GLFW_KEY_D:
+                    camera = camera.left(speed);
+                    break;
+                case GLFW_KEY_KP_ADD:
+                    camera = camera.backward(speed);
+                    break;
+                case GLFW_KEY_KP_SUBTRACT:
+                    camera = camera.forward(speed);
+                    break;case GLFW_KEY_O:
+                    camera = new Camera();
+                    glOrtho(.1,.0,.1,.1,.1,.0);
+
+                    break;
+                default:
+
+            }
+        }
+    };
+
 
     @Override
     public GLFWCursorPosCallback getCursorCallback() {
@@ -173,13 +217,13 @@ public class Renderer extends AbstractRenderer {
         return mouseButtonCallback;
     }
 
+    public GLFWScrollCallback getScrollCallback() {
+        return scrollCallback;
+    }
 
-    public GLFWKeyCallback glfwSetKeyCallback(){return keyCallback;}
-
-  ;
-
-
-
+    public GLFWKeyCallback getKeyCallback() {
+        return keyCallback;
+    }
 
 
 }

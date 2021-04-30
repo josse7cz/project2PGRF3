@@ -97,11 +97,14 @@ public abstract class AbstractRenderer {
             double x = xBuffer.get(0);
             double y = yBuffer.get(0);
 
-            if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS) {
+            if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
                 System.out.println("Mouse button 1 is pressed at cursor position [" + x + ", " + y + "]");
             }
 
             if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_RELEASE) {
+                System.out.println("Mouse button 1 is released at cursor position [" + x + ", " + y + "]");
+            }
+            if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
                 System.out.println("Mouse button 1 is released at cursor position [" + x + ", " + y + "]");
             }
         }
@@ -142,5 +145,4 @@ public abstract class AbstractRenderer {
         return scrollCallback;
     }
 
-    public abstract GLFWKeyCallback glfwSetKeyCallback();
 }

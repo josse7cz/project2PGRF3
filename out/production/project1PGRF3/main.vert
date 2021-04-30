@@ -3,6 +3,7 @@ in vec2 inPosition; // input from the vertex buffer
 
 uniform mat4 view;
 uniform mat4 projection;
+uniform mat4 model;
 uniform float type;
 
 out vec2 texCoord;
@@ -36,5 +37,5 @@ void main() {
 		finalPosition = vec3(position, getZ(position));
 	}
 	vec4 pos4 = vec4(finalPosition, 1.0);
-	gl_Position = projection * view * pos4;
+	gl_Position = projection * view * model*pos4;
 } 

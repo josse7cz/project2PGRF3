@@ -6,15 +6,14 @@ import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.glfw.GLFWMouseButtonCallback;
 import org.lwjgl.glfw.GLFWScrollCallback;
-import transforms.Camera;
-import transforms.Mat4PerspRH;
-import transforms.Vec3D;
+import transforms.*;
 
 import java.io.IOException;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.*;
+import static org.lwjgl.opengl.GL20.glGetUniformLocation;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
 import static org.lwjgl.opengl.GL30.glBindFramebuffer;
 
@@ -27,13 +26,16 @@ public class Renderer extends AbstractRenderer {
 
     private int shaderProgramMain, shaderProgramPost;
     private OGLBuffers buffersMain;
-    private int viewLocation, projectionLocation, typeLocation;
+    private int viewLocation, projectionLocation, typeLocation,timeLocation,modelLocation;
     private Camera camera;
     private Mat4PerspRH projection;
+    private Mat4OrthoRH orthoRH;
+    private Mat4 model;
+
     private OGLTexture2D textureMosaic;
     private OGLBuffers buffersPost;
-
-    private boolean mousePressed = false;
+    private boolean mousePressed, line,orthoView = false;
+    private boolean projectionView = true;
     private double oldMx, oldMy;
     private OGLRenderTarget renderTarget;
     private OGLTexture2D.Viewer viewer;
@@ -47,12 +49,13 @@ public class Renderer extends AbstractRenderer {
 
         glClearColor(0.1f, 0.1f, 0.1f, 1f);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
         shaderProgramMain = ShaderUtils.loadProgram("/main");
         viewLocation = glGetUniformLocation(shaderProgramMain, "view");
         projectionLocation = glGetUniformLocation(shaderProgramMain, "projection");
         typeLocation = glGetUniformLocation(shaderProgramMain, "type");
+        timeLocation=glGetUniformLocation(shaderProgramMain,"time");
+        modelLocation=glGetUniformLocation(shaderProgramMain,"model");
 
         shaderProgramPost = ShaderUtils.loadProgram("/post");
 
@@ -61,20 +64,28 @@ public class Renderer extends AbstractRenderer {
                 .withAzimuth(5 / 4f * Math.PI)
                 .withZenith(-1 / 5f * Math.PI);
 
+        model=new Mat4RotY(0.0001);
         projection = new Mat4PerspRH(
                 Math.PI / 3,
                 height / (float) width,
                 0.1,
                 20
         );
+        orthoRH = new Mat4OrthoRH(
+                -20 * width / (float) height,
+                20 * width / (float) height,
+                0.1,
+                20);
+//        (-20 * width / (float) height, 20 * width / (float) height, -20, 20, 0.1f, 100.0f)
 
 
-        buffersMain = TriangleFactory.generateTriangle(50, 50);
-        buffersPost = TriangleFactory.generateTriangle(2, 2);
-        renderTarget = new OGLRenderTarget(1024, 1024);
+        buffersMain = TriangleFactory.generateTriangle(200, 200);
+        buffersPost = TriangleFactory.generateTriangle(200, 200);
+        renderTarget = new OGLRenderTarget(1920, 1680);
 
         try {
-            textureMosaic = new OGLTexture2D("./mosaic.jpg");
+           textureMosaic = new OGLTexture2D("./mosaic.jpg");
+           //textureMosaic = new OGLTexture2D("./hour.png");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -88,8 +99,13 @@ public class Renderer extends AbstractRenderer {
         glEnable(GL_DEPTH_TEST);
         // text-renderer disables depth-test (z-buffer)
 
+        if (line) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        }
         renderMain();
         renderPostProcessing();
+
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
         glDisable(GL_DEPTH_TEST);
         viewer.view(textureMosaic, -1, -1, 0.5);
@@ -106,7 +122,16 @@ public class Renderer extends AbstractRenderer {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glUniformMatrix4fv(viewLocation, false, camera.getViewMatrix().floatArray());
-        glUniformMatrix4fv(projectionLocation, false, projection.floatArray());
+
+        glUniformMatrix4fv(modelLocation, false, model.floatArray());
+
+        if (projectionView) {
+            glUniformMatrix4fv(projectionLocation, false, projection.floatArray());
+        }//projection
+        else if (orthoView) {
+            glUniformMatrix4fv(projectionLocation, false, orthoRH.floatArray());
+
+        }
 
         textureMosaic.bind(shaderProgramMain, "textureMosaic", 0);
 
@@ -118,6 +143,15 @@ public class Renderer extends AbstractRenderer {
         glUniform1f(typeLocation, 1.5f);
         buffersMain.draw(GL_TRIANGLE_STRIP, shaderProgramMain);
     }
+    /*
+    osvetleni
+     */
+    // nastaveni svetla
+    // Prepare light parameters.
+    float SHINE_ALL_DIRECTIONS = 1;
+    float[] lightPos = { -30, 0, 0, SHINE_ALL_DIRECTIONS };
+    float[] lightColorAmbient = { 0.2f, 0.2f, 0.2f, 1f };
+    float[] lightColorSpecular = { 0.8f, 0.8f, 0.8f, 1f };
 
     private void renderPostProcessing() {
         glUseProgram(shaderProgramPost);
@@ -152,11 +186,13 @@ public class Renderer extends AbstractRenderer {
                 mousePressed = action == GLFW_PRESS;
             }
             if (button == GLFW_MOUSE_BUTTON_RIGHT) {
-                double[] il=new double[1];
-                double[] ik=new double[1];
-                glfwGetCursorPos(window, il,ik);
+                double[] il = new double[1];
+                double[] ik = new double[1];
+                glfwGetCursorPos(window, il, ik);
 
-                System.out.println("mouse right dodelat na rotaci");
+                model.mul(il[0]+oldMy);
+                mousePressed = action == GLFW_PRESS;
+                System.out.println("mouse right dodelat na rotaci"+il[0]);
             }
         }
     };
@@ -191,14 +227,32 @@ public class Renderer extends AbstractRenderer {
                     camera = camera.left(speed);
                     break;
                 case GLFW_KEY_KP_ADD:
-                    camera = camera.backward(speed);
+                    camera = camera.forward(speed);
                     break;
                 case GLFW_KEY_KP_SUBTRACT:
-                    camera = camera.forward(speed);
-                    break;case GLFW_KEY_O:
-                    camera = new Camera();
-                    glOrtho(.1,.0,.1,.1,.1,.0);
-
+                    camera = camera.backward(speed);
+                    break;
+                case GLFW_KEY_L:
+                    if (!line) {
+                        line = true;
+                    }
+                    break;
+                case GLFW_KEY_F:
+                    if (line) {
+                        line = false;
+                    }
+                    break;
+                case GLFW_KEY_O:
+                    if (!orthoView) {
+                        orthoView = true;
+                        projectionView = false;
+                    }
+                    break;
+                case GLFW_KEY_P:
+                    if (!projectionView) {
+                        projectionView = true;
+                        orthoView = false;
+                    }
                     break;
                 default:
 

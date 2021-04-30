@@ -26,7 +26,7 @@ public class Renderer extends AbstractRenderer {
 
     private int shaderProgramMain, shaderProgramPost;
     private OGLBuffers buffersMain;
-    private int viewLocation, projectionLocation, typeLocation,timeLocation,modelLocation;
+    private int viewLocation, projectionLocation, typeLocation, timeLocation, modelLocation;
     private Camera camera;
     private Mat4PerspRH projection;
     private Mat4OrthoRH orthoRH;
@@ -34,7 +34,7 @@ public class Renderer extends AbstractRenderer {
 
     private OGLTexture2D textureMosaic;
     private OGLBuffers buffersPost;
-    private boolean mousePressed, line,orthoView = false;
+    private boolean mousePressed, line, orthoView, triangleLine = false;
     private boolean projectionView = true;
     private double oldMx, oldMy;
     private OGLRenderTarget renderTarget;
@@ -54,8 +54,8 @@ public class Renderer extends AbstractRenderer {
         viewLocation = glGetUniformLocation(shaderProgramMain, "view");
         projectionLocation = glGetUniformLocation(shaderProgramMain, "projection");
         typeLocation = glGetUniformLocation(shaderProgramMain, "type");
-        timeLocation=glGetUniformLocation(shaderProgramMain,"time");
-        modelLocation=glGetUniformLocation(shaderProgramMain,"model");
+        timeLocation = glGetUniformLocation(shaderProgramMain, "time");
+        modelLocation = glGetUniformLocation(shaderProgramMain, "model");
 
         shaderProgramPost = ShaderUtils.loadProgram("/post");
 
@@ -64,7 +64,7 @@ public class Renderer extends AbstractRenderer {
                 .withAzimuth(5 / 4f * Math.PI)
                 .withZenith(-1 / 5f * Math.PI);
 
-        model=new Mat4RotY(0.0001);
+        model = new Mat4RotY(0.001);
         projection = new Mat4PerspRH(
                 Math.PI / 3,
                 height / (float) width,
@@ -78,14 +78,18 @@ public class Renderer extends AbstractRenderer {
                 20);
 //        (-20 * width / (float) height, 20 * width / (float) height, -20, 20, 0.1f, 100.0f)
 
-
+        if (triangleLine) {
+            buffersMain = GridFactory.generateGrid(200, 200);
+            buffersPost = GridFactory.generateGrid(200, 200);
+        }else
         buffersMain = TriangleFactory.generateTriangle(200, 200);
         buffersPost = TriangleFactory.generateTriangle(200, 200);
+
         renderTarget = new OGLRenderTarget(1920, 1680);
 
         try {
-           textureMosaic = new OGLTexture2D("./mosaic.jpg");
-           //textureMosaic = new OGLTexture2D("./hour.png");
+            textureMosaic = new OGLTexture2D("./mosaic.jpg");
+            //textureMosaic = new OGLTexture2D("./hour.png");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -106,13 +110,13 @@ public class Renderer extends AbstractRenderer {
         renderPostProcessing();
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
         glDisable(GL_DEPTH_TEST);
         viewer.view(textureMosaic, -1, -1, 0.5);
         viewer.view(renderTarget.getColorTexture(), -1, -0.5, 0.5);
         viewer.view(renderTarget.getDepthTexture(), -1, 0, 0.5);
         textRenderer.addStr2D(width - 90, height - 3, " (c) PGRF UHK");
         textRenderer.addStr2D(2, 20, " Návod pro použítí");
+
     }
 
     private void renderMain() {
@@ -138,20 +142,30 @@ public class Renderer extends AbstractRenderer {
         /*
         objekty
          */
+
+        if (triangleLine) {
+            glUniform1f(typeLocation, 0f);//dalsi objekt
+            buffersMain.draw(GL_TRIANGLES, shaderProgramMain);
+            glUniform1f(typeLocation, 1.5f);
+            buffersMain.draw(GL_TRIANGLES, shaderProgramMain);
+        }else
         glUniform1f(typeLocation, 0f);//dalsi objekt
         buffersMain.draw(GL_TRIANGLE_STRIP, shaderProgramMain);
         glUniform1f(typeLocation, 1.5f);
         buffersMain.draw(GL_TRIANGLE_STRIP, shaderProgramMain);
+
+
     }
+
     /*
     osvetleni
      */
     // nastaveni svetla
     // Prepare light parameters.
     float SHINE_ALL_DIRECTIONS = 1;
-    float[] lightPos = { -30, 0, 0, SHINE_ALL_DIRECTIONS };
-    float[] lightColorAmbient = { 0.2f, 0.2f, 0.2f, 1f };
-    float[] lightColorSpecular = { 0.8f, 0.8f, 0.8f, 1f };
+    float[] lightPos = {-30, 0, 0, SHINE_ALL_DIRECTIONS};
+    float[] lightColorAmbient = {0.2f, 0.2f, 0.2f, 1f};
+    float[] lightColorSpecular = {0.8f, 0.8f, 0.8f, 1f};
 
     private void renderPostProcessing() {
         glUseProgram(shaderProgramPost);
@@ -159,7 +173,9 @@ public class Renderer extends AbstractRenderer {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, width, height); // must reset back - render target is setting its own viewport
         renderTarget.getColorTexture().bind(shaderProgramPost, "textureRendered", 0);
+        if(triangleLine){buffersPost.draw(GL_TRIANGLES, shaderProgramPost);}else
         buffersPost.draw(GL_TRIANGLE_STRIP, shaderProgramPost);
+
     }
 
     private final GLFWCursorPosCallback cursorPosCallback = new GLFWCursorPosCallback() {
@@ -190,9 +206,9 @@ public class Renderer extends AbstractRenderer {
                 double[] ik = new double[1];
                 glfwGetCursorPos(window, il, ik);
 
-                model.mul(il[0]+oldMy);
+                model.mul(il[0] + oldMy);
                 mousePressed = action == GLFW_PRESS;
-                System.out.println("mouse right dodelat na rotaci"+il[0]);
+                System.out.println("mouse right dodelat na rotaci" + il[0]);
             }
         }
     };
@@ -252,6 +268,18 @@ public class Renderer extends AbstractRenderer {
                     if (!projectionView) {
                         projectionView = true;
                         orthoView = false;
+                    }
+                    break;
+                    case GLFW_KEY_M:
+                    if (!triangleLine) {
+                        triangleLine = true;
+                        System.out.println("line");
+                    }
+                    break;
+                    case GLFW_KEY_N:
+                    if (triangleLine) {
+                        triangleLine = false;
+                        System.out.println("strip");
                     }
                     break;
                 default:

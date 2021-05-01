@@ -13,5 +13,6 @@ void main() {
 		outColor = vec4(grey, grey, grey, 1);
 	} else {
 		outColor = textureColor;
+
 	}
 }

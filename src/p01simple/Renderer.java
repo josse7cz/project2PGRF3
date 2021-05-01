@@ -51,13 +51,15 @@ public class Renderer extends AbstractRenderer {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
         shaderProgramMain = ShaderUtils.loadProgram("/main");
+        shaderProgramPost = ShaderUtils.loadProgram("/post");
+        modelLocation = glGetUniformLocation(shaderProgramMain, "model");
         viewLocation = glGetUniformLocation(shaderProgramMain, "view");
         projectionLocation = glGetUniformLocation(shaderProgramMain, "projection");
         typeLocation = glGetUniformLocation(shaderProgramMain, "type");
         timeLocation = glGetUniformLocation(shaderProgramMain, "time");
-        modelLocation = glGetUniformLocation(shaderProgramMain, "model");
 
-        shaderProgramPost = ShaderUtils.loadProgram("/post");
+
+
 
         camera = new Camera()
                 .withPosition(new Vec3D(5, 5, 2))//oddálení, přiblizeni

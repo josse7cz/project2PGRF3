@@ -5,14 +5,15 @@ uniform mat4 view;
 uniform mat4 projection;
 uniform mat4 model;
 uniform float type;
-uniform int time;
+uniform float time;
+varying vec4 position;
 
 out vec2 texCoord;
 
 const float PI = 3.1415;
 
 float getZ(vec2 vec) {
-    return 0.55 * cos(sqrt(200 * vec.x * vec.x + 20 * vec.y * vec.y));
+    return 0.5 * cos(sqrt(25 * vec.x * vec.x + 20 * vec.y * vec.y*time));
 }
 
 vec3 getSphere(vec2 vec) {
@@ -20,8 +21,9 @@ vec3 getSphere(vec2 vec) {
     float ze = vec.y * PI / 2.0;// <-1;1> -> <-PI/2;PI/2>
     float r = 1.0;
     float x = r * cos(az) * cos(ze);
-    float y = 2 * r * sin(az) * cos(ze);
+    float y =  0.2 * sin(5.0 * position.x + 5);//2 * r * sin(az) * cos(ze);
     float z = 0.5 * r * sin(ze);
+
 
     return vec3(x, y, z);
 }
@@ -40,6 +42,12 @@ void main() {
     texCoord = inPosition;
     // grid je <0;1> - chci <-1;1>
     vec2 position = inPosition * 2 - 1;
+//    vec3 normal = normalize(normal(inPosition.x, inPosition.y));//normála
+//    normal = inverse(transpose(mat3(matMV)))*normal;
+//    vec3 lightDirection = normalize(lightSource - posMV.xyz);
+//    intensity = dot(lightDirection, normal);
+//    vertColor = vec3(normal.xyz);
+
 
     vec3 finalPosition;
     if (type == 0) {
@@ -51,4 +59,6 @@ void main() {
     }
     vec4 pos4 = vec4(finalPosition, 1.0);
     gl_Position = projection * view * model*pos4;
+
+
 } 

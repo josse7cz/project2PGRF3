@@ -26,7 +26,7 @@ public class Renderer extends AbstractRenderer {
 
     private int shaderProgramMain, shaderProgramPost;
     private OGLBuffers buffersMain;
-    private int viewLocation, projectionLocation, typeLocation, timeLocation, modelLocation;
+    private int viewLocation, projectionLocation, typeLocation, modelLocation, locTime, animace;
     private Camera camera;
     private Mat4PerspRH projection;
     private Mat4OrthoRH orthoRH;
@@ -37,8 +37,10 @@ public class Renderer extends AbstractRenderer {
     private boolean mousePressed, line, orthoView, triangleLine = false;
     private boolean projectionView = true;
     private double oldMx, oldMy;
+    private float time = 1;
     private OGLRenderTarget renderTarget;
     private OGLTexture2D.Viewer viewer;
+    private double a = 0;
 
     @Override
     public void init() {
@@ -56,9 +58,7 @@ public class Renderer extends AbstractRenderer {
         viewLocation = glGetUniformLocation(shaderProgramMain, "view");
         projectionLocation = glGetUniformLocation(shaderProgramMain, "projection");
         typeLocation = glGetUniformLocation(shaderProgramMain, "type");
-        timeLocation = glGetUniformLocation(shaderProgramMain, "time");
-
-
+        locTime = glGetUniformLocation(shaderProgramMain, "time");
 
 
         camera = new Camera()
@@ -83,14 +83,15 @@ public class Renderer extends AbstractRenderer {
         if (triangleLine) {
             buffersMain = GridFactory.generateGrid(200, 200);
             buffersPost = GridFactory.generateGrid(200, 200);
-        }else
-        buffersMain = TriangleFactory.generateTriangle(200, 200);
+        } else
+            buffersMain = TriangleFactory.generateTriangle(200, 200);
         buffersPost = TriangleFactory.generateTriangle(200, 200);
 
         renderTarget = new OGLRenderTarget(1920, 1680);
 
         try {
-            textureMosaic = new OGLTexture2D("./mosaic.jpg");
+            textureMosaic = new OGLTexture2D("./drevoTexture.jpg");
+           // textureMosaic = new OGLTexture2D("./mosaic.jpg");
             //textureMosaic = new OGLTexture2D("./hour.png");
         } catch (IOException e) {
             e.printStackTrace();
@@ -130,6 +131,20 @@ public class Renderer extends AbstractRenderer {
         glUniformMatrix4fv(viewLocation, false, camera.getViewMatrix().floatArray());
 
         glUniformMatrix4fv(modelLocation, false, model.floatArray());
+        glUniform1f(locTime, time);
+
+
+        if (animace==1) {
+            if (a < 30) {
+                time += 0.1;
+                a = a + 0.1;
+
+            } else if (a >= 30 && a < 60) {
+                time -= 0.1;
+                a = a + 0.1;
+
+            } else a = 0;
+        }
 
         if (projectionView) {
             glUniformMatrix4fv(projectionLocation, false, projection.floatArray());
@@ -150,9 +165,11 @@ public class Renderer extends AbstractRenderer {
             buffersMain.draw(GL_TRIANGLES, shaderProgramMain);
             glUniform1f(typeLocation, 1.5f);
             buffersMain.draw(GL_TRIANGLES, shaderProgramMain);
-        }else
-        glUniform1f(typeLocation, 0f);//dalsi objekt
+        } else
+
+            glUniform1f(typeLocation, 0f);//dalsi objekt
         buffersMain.draw(GL_TRIANGLE_STRIP, shaderProgramMain);
+
         glUniform1f(typeLocation, 1.5f);
         buffersMain.draw(GL_TRIANGLE_STRIP, shaderProgramMain);
 
@@ -175,8 +192,10 @@ public class Renderer extends AbstractRenderer {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, width, height); // must reset back - render target is setting its own viewport
         renderTarget.getColorTexture().bind(shaderProgramPost, "textureRendered", 0);
-        if(triangleLine){buffersPost.draw(GL_TRIANGLES, shaderProgramPost);}else
-        buffersPost.draw(GL_TRIANGLE_STRIP, shaderProgramPost);
+        if (triangleLine) {
+            buffersPost.draw(GL_TRIANGLES, shaderProgramPost);
+        } else
+            buffersPost.draw(GL_TRIANGLE_STRIP, shaderProgramPost);
 
     }
 
@@ -224,12 +243,14 @@ public class Renderer extends AbstractRenderer {
             camera = camera.backward(yoffset);
         }
     };
+
     /*
-    metoda pro zpracovani vstupu z klavesnice
-     */
+        metoda pro zpracovani vstupu z klavesnice
+         */
     private final GLFWKeyCallback keyCallback = new GLFWKeyCallback() {
         @Override
         public void invoke(long window, int key, int scancode, int action, int mods) {
+           if(action==GLFW_PRESS||action==GLFW_REPEAT){
             double speed = 0.25;
             switch (key) {
                 case GLFW_KEY_W:
@@ -253,38 +274,32 @@ public class Renderer extends AbstractRenderer {
                 case GLFW_KEY_L:
                     if (!line) {
                         line = true;
-                    }
+                    }else line=false;
                     break;
-                case GLFW_KEY_F:
-                    if (line) {
-                        line = false;
-                    }
-                    break;
+
                 case GLFW_KEY_O:
                     if (!orthoView) {
                         orthoView = true;
                         projectionView = false;
-                    }
-                    break;
-                case GLFW_KEY_P:
-                    if (!projectionView) {
+                    }else {
                         projectionView = true;
                         orthoView = false;
                     }
                     break;
-                    case GLFW_KEY_M:
+
+                case GLFW_KEY_M:
                     if (!triangleLine) {
                         triangleLine = true;
-                        System.out.println("line");
-                    }
+                    }else triangleLine=false;
                     break;
-                    case GLFW_KEY_N:
-                    if (triangleLine) {
-                        triangleLine = false;
-                        System.out.println("strip");
-                    }
+                    case GLFW_KEY_Q:
+                    if (animace==1) {
+                        animace = 0;  }
+                    else
+                        animace=1;
                     break;
-                default:
+
+                default:}
 
             }
         }

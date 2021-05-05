@@ -26,7 +26,7 @@ public class Renderer extends AbstractRenderer {
 
     private int shaderProgramMain, shaderProgramPost;
     private OGLBuffers buffersMain;
-    private int viewLocation, projectionLocation, typeLocation, modelLocation, locTime, animace;
+    private int viewLocation, projectionLocation,  modelLocation, locTime, animace;
     private Camera camera;
     private Mat4PerspRH projection;
     private Mat4OrthoRH orthoRH;
@@ -41,6 +41,8 @@ public class Renderer extends AbstractRenderer {
     private OGLRenderTarget renderTarget;
     private OGLTexture2D.Viewer viewer;
     private double a = 0;
+    private int typeLocation;
+    private boolean point;
 
     @Override
     public void init() {
@@ -91,7 +93,7 @@ public class Renderer extends AbstractRenderer {
 
         try {
             textureMosaic = new OGLTexture2D("./drevoTexture.jpg");
-           // textureMosaic = new OGLTexture2D("./mosaic.jpg");
+            // textureMosaic = new OGLTexture2D("./mosaic.jpg");
             //textureMosaic = new OGLTexture2D("./hour.png");
         } catch (IOException e) {
             e.printStackTrace();
@@ -108,7 +110,14 @@ public class Renderer extends AbstractRenderer {
 
         if (line) {
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            point=false;
         }
+        if (point){
+            glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+            line=false;
+        }
+        
+
         renderMain();
         renderPostProcessing();
 
@@ -128,13 +137,20 @@ public class Renderer extends AbstractRenderer {
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        glUniformMatrix4fv(modelLocation, false, model.floatArray());
+
         glUniformMatrix4fv(viewLocation, false, camera.getViewMatrix().floatArray());
 
-        glUniformMatrix4fv(modelLocation, false, model.floatArray());
+        if (projectionView) {
+            glUniformMatrix4fv(projectionLocation, false, projection.floatArray());
+        }//projection
+        else if (orthoView) {
+            glUniformMatrix4fv(projectionLocation, false, orthoRH.floatArray());
+
+        }
         glUniform1f(locTime, time);
 
-
-        if (animace==1) {
+        if (animace == 1) {
             if (a < 30) {
                 time += 0.1;
                 a = a + 0.1;
@@ -146,13 +162,6 @@ public class Renderer extends AbstractRenderer {
             } else a = 0;
         }
 
-        if (projectionView) {
-            glUniformMatrix4fv(projectionLocation, false, projection.floatArray());
-        }//projection
-        else if (orthoView) {
-            glUniformMatrix4fv(projectionLocation, false, orthoRH.floatArray());
-
-        }
 
         textureMosaic.bind(shaderProgramMain, "textureMosaic", 0);
 
@@ -161,16 +170,22 @@ public class Renderer extends AbstractRenderer {
          */
 
         if (triangleLine) {
-            glUniform1f(typeLocation, 0f);//dalsi objekt
+            glUniform1f(typeLocation, 0f);
+            glUniformMatrix4fv(modelLocation, false, new Mat4Transl(2, 0, 0).floatArray());
             buffersMain.draw(GL_TRIANGLES, shaderProgramMain);
-            glUniform1f(typeLocation, 1.5f);
+
+            glUniform1f(typeLocation, 1f);
+//        glUniformMatrix4fv(..., false, new Mat4Transl(camera.getPosition()).floatArray());
+            glUniformMatrix4fv(modelLocation, false, new Mat4Transl(-2, 0, 0).floatArray());
             buffersMain.draw(GL_TRIANGLES, shaderProgramMain);
         } else
 
             glUniform1f(typeLocation, 0f);//dalsi objekt
+        glUniformMatrix4fv(modelLocation, false, new Mat4Transl(2, 0, 0).floatArray());
         buffersMain.draw(GL_TRIANGLE_STRIP, shaderProgramMain);
 
-        glUniform1f(typeLocation, 1.5f);
+        glUniform1f(typeLocation, 1f);
+        glUniformMatrix4fv(modelLocation, false, new Mat4Transl(-1.5, -0.5, 0).floatArray());
         buffersMain.draw(GL_TRIANGLE_STRIP, shaderProgramMain);
 
 
@@ -250,56 +265,63 @@ public class Renderer extends AbstractRenderer {
     private final GLFWKeyCallback keyCallback = new GLFWKeyCallback() {
         @Override
         public void invoke(long window, int key, int scancode, int action, int mods) {
-           if(action==GLFW_PRESS||action==GLFW_REPEAT){
-            double speed = 0.25;
-            switch (key) {
-                case GLFW_KEY_W:
-                    camera = camera.down(speed);
-                    break;
-                case GLFW_KEY_S:
-                    camera = camera.up(speed);
-                    break;
-                case GLFW_KEY_A:
-                    camera = camera.right(speed);
-                    break;
-                case GLFW_KEY_D:
-                    camera = camera.left(speed);
-                    break;
-                case GLFW_KEY_KP_ADD:
-                    camera = camera.forward(speed);
-                    break;
-                case GLFW_KEY_KP_SUBTRACT:
-                    camera = camera.backward(speed);
-                    break;
-                case GLFW_KEY_L:
-                    if (!line) {
-                        line = true;
-                    }else line=false;
-                    break;
+            if (action == GLFW_PRESS || action == GLFW_REPEAT) {
+                double speed = 0.25;
+                switch (key) {
+                    case GLFW_KEY_W:
+                        camera = camera.down(speed);
+                        break;
+                    case GLFW_KEY_S:
+                        camera = camera.up(speed);
+                        break;
+                    case GLFW_KEY_A:
+                        camera = camera.right(speed);
+                        break;
+                    case GLFW_KEY_D:
+                        camera = camera.left(speed);
+                        break;
+                    case GLFW_KEY_KP_ADD:
+                        camera = camera.forward(speed);
+                        break;
+                    case GLFW_KEY_KP_SUBTRACT:
+                        camera = camera.backward(speed);
+                        break;
+                    case GLFW_KEY_L:
+                        if (!line) {
+                            line = true;
+                        } else line = false;
+                        break;
+                        case GLFW_KEY_P:
+                        if (!point) {
+                            point = true;
+                            line=false;
+                        } else point = false;
+                        break;
 
-                case GLFW_KEY_O:
-                    if (!orthoView) {
-                        orthoView = true;
-                        projectionView = false;
-                    }else {
-                        projectionView = true;
-                        orthoView = false;
-                    }
-                    break;
+                    case GLFW_KEY_O:
+                        if (!orthoView) {
+                            orthoView = true;
+                            projectionView = false;
+                        } else {
+                            projectionView = true;
+                            orthoView = false;
+                        }
+                        break;
 
-                case GLFW_KEY_M:
-                    if (!triangleLine) {
-                        triangleLine = true;
-                    }else triangleLine=false;
-                    break;
+                    case GLFW_KEY_M:
+                        if (!triangleLine) {
+                            triangleLine = true;
+                        } else triangleLine = false;
+                        break;
                     case GLFW_KEY_Q:
-                    if (animace==1) {
-                        animace = 0;  }
-                    else
-                        animace=1;
-                    break;
+                        if (animace == 1) {
+                            animace = 0;
+                        } else
+                            animace = 1;
+                        break;
 
-                default:}
+                    default:
+                }
 
             }
         }

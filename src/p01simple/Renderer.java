@@ -38,11 +38,14 @@ public class Renderer extends AbstractRenderer {
     private boolean projectionView = true;
     private double oldMx, oldMy;
     private float time = 1;
+
+
     private OGLRenderTarget renderTarget;
     private OGLTexture2D.Viewer viewer;
     private double a = 0;
     private int typeLocation;
     private boolean point;
+    private float objType2=1,objType1=0;
 
     @Override
     public void init() {
@@ -61,6 +64,7 @@ public class Renderer extends AbstractRenderer {
         projectionLocation = glGetUniformLocation(shaderProgramMain, "projection");
         typeLocation = glGetUniformLocation(shaderProgramMain, "type");
         locTime = glGetUniformLocation(shaderProgramMain, "time");
+
 
 
         camera = new Camera()
@@ -116,7 +120,7 @@ public class Renderer extends AbstractRenderer {
             glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
             line=false;
         }
-        
+
 
         renderMain();
         renderPostProcessing();
@@ -170,21 +174,22 @@ public class Renderer extends AbstractRenderer {
          */
 
         if (triangleLine) {
-            glUniform1f(typeLocation, 0f);
+
+            glUniform1f(typeLocation, objType1);
             glUniformMatrix4fv(modelLocation, false, new Mat4Transl(2, 0, 0).floatArray());
             buffersMain.draw(GL_TRIANGLES, shaderProgramMain);
 
-            glUniform1f(typeLocation, 1f);
+            glUniform1f(typeLocation, objType2);
 //        glUniformMatrix4fv(..., false, new Mat4Transl(camera.getPosition()).floatArray());
             glUniformMatrix4fv(modelLocation, false, new Mat4Transl(-2, 0, 0).floatArray());
             buffersMain.draw(GL_TRIANGLES, shaderProgramMain);
         } else
 
-            glUniform1f(typeLocation, 0f);//dalsi objekt
+            glUniform1f(typeLocation, objType1);//dalsi objekt
         glUniformMatrix4fv(modelLocation, false, new Mat4Transl(2, 0, 0).floatArray());
         buffersMain.draw(GL_TRIANGLE_STRIP, shaderProgramMain);
 
-        glUniform1f(typeLocation, 1f);
+        glUniform1f(typeLocation, objType2);
         glUniformMatrix4fv(modelLocation, false, new Mat4Transl(-1.5, -0.5, 0).floatArray());
         buffersMain.draw(GL_TRIANGLE_STRIP, shaderProgramMain);
 
@@ -259,9 +264,10 @@ public class Renderer extends AbstractRenderer {
         }
     };
 
+
     /*
-        metoda pro zpracovani vstupu z klavesnice
-         */
+            metoda pro zpracovani vstupu z klavesnice
+             */
     private final GLFWKeyCallback keyCallback = new GLFWKeyCallback() {
         @Override
         public void invoke(long window, int key, int scancode, int action, int mods) {
@@ -319,6 +325,43 @@ public class Renderer extends AbstractRenderer {
                         } else
                             animace = 1;
                         break;
+                        case GLFW_KEY_1:
+                        if (objType1 == 1) {
+                            objType1 = 0;
+                        } else
+                            objType1 = 1;
+                        break;
+                        case GLFW_KEY_2:
+                        if (objType2 == 1) {
+                            objType2 = 0;
+                        } else
+                            objType2 = 1;
+                        break;
+                        case GLFW_KEY_3:
+                        if (objType2 == 2) {
+                            objType2 = 0;
+                        } else
+                            objType2 = 2;
+                        break;
+                        case GLFW_KEY_4:
+                        if (objType1 == 3) {
+                            objType1= 0;
+                        } else
+                            objType1 = 3;
+                        break;
+                    case GLFW_KEY_5:
+                        if (objType1 == 4) {
+                            objType1= 0;
+                        } else
+                            objType1 = 4;
+                        break;
+                    case GLFW_KEY_6:
+                        if (objType1 == 5) {
+                            objType1= 0;
+                        } else
+                            objType1 = 5;
+                        break;
+
 
                     default:
                 }

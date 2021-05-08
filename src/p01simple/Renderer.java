@@ -31,21 +31,20 @@ public class Renderer extends AbstractRenderer {
     private Mat4PerspRH projection;
     private Mat4OrthoRH orthoRH;
     private Mat4 model;
-
-    private OGLTexture2D textureMosaic;
+    private OGLTexture2D textureMosaic,textureBall,textureWood;
     private OGLBuffers buffersPost;
     private boolean mousePressed, line, orthoView, triangleLine = false;
     private boolean projectionView = true;
     private double oldMx, oldMy;
     private float time = 1;
-
-
     private OGLRenderTarget renderTarget;
     private OGLTexture2D.Viewer viewer;
     private double a = 0;
     private int typeLocation;
     private boolean point;
     private float objType2=1,objType1=0;
+    private OGLTexture2D textureEarth;
+
 
     @Override
     public void init() {
@@ -88,7 +87,7 @@ public class Renderer extends AbstractRenderer {
 
         if (triangleLine) {
             buffersMain = GridFactory.generateGrid(200, 200);
-            buffersPost = GridFactory.generateGrid(200, 200);
+            buffersPost = GridFactory.generateGrid(200,200);
         } else
             buffersMain = TriangleFactory.generateTriangle(200, 200);
         buffersPost = TriangleFactory.generateTriangle(200, 200);
@@ -96,9 +95,12 @@ public class Renderer extends AbstractRenderer {
         renderTarget = new OGLRenderTarget(1920, 1680);
 
         try {
-            textureMosaic = new OGLTexture2D("./drevoTexture.jpg");
-            // textureMosaic = new OGLTexture2D("./mosaic.jpg");
-            //textureMosaic = new OGLTexture2D("./hour.png");
+            textureMosaic = new OGLTexture2D("./mosaic.jpg");
+            textureWood=new OGLTexture2D("./woodTexture.jpg");
+            textureEarth=new OGLTexture2D("./globe.jpg");
+            //textureBall=new OGLTexture2D("./Ball11.jpg");
+
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -109,6 +111,14 @@ public class Renderer extends AbstractRenderer {
 
     @Override
     public void display() {
+
+//        textureMosaic.bind(shaderProgramMain,"textureMosaic",0);
+//        textureWood.bind(shaderProgramMain,"textureWood",1);
+//        textureEarth.bind(shaderProgramMain,"textureEarth",2);
+
+
+
+
         glEnable(GL_DEPTH_TEST);
         // text-renderer disables depth-test (z-buffer)
 
@@ -127,8 +137,8 @@ public class Renderer extends AbstractRenderer {
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         glDisable(GL_DEPTH_TEST);
-        viewer.view(textureMosaic, -1, -1, 0.5);
-        viewer.view(renderTarget.getColorTexture(), -1, -0.5, 0.5);
+         viewer.view(textureWood, -1, -1, 0.5);//zobrazení textury vlevo dole
+         viewer.view(renderTarget.getColorTexture(), -1, -0.5, 0.5);
         viewer.view(renderTarget.getDepthTexture(), -1, 0, 0.5);
         textRenderer.addStr2D(width - 90, height - 3, " (c) PGRF UHK");
         textRenderer.addStr2D(2, 20, " Návod pro použítí");
@@ -167,7 +177,24 @@ public class Renderer extends AbstractRenderer {
         }
 
 
-        textureMosaic.bind(shaderProgramMain, "textureMosaic", 0);
+        if(objType1==0){
+            textureMosaic.bind(shaderProgramMain, "textureMosaic", 0);
+           glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+        } else if(objType1==1){
+            textureWood.bind(shaderProgramMain, "textureWood", 1);
+        }
+        else if(objType1==2){
+            textureEarth.bind(shaderProgramMain,"textureEarth",2);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_LINE_STIPPLE_REPEAT);
+        }
+        if(objType2==0){
+            textureMosaic.bind(shaderProgramMain, "textureMosaic", 0);
+        }else if(objType2==1){
+            textureWood.bind(shaderProgramMain, "textureWood", 1);
+        }
+        else if(objType2==2){
+            textureEarth.bind(shaderProgramMain,"textureEarth",2);
+        }
 
         /*
         objekty
@@ -212,6 +239,10 @@ public class Renderer extends AbstractRenderer {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, width, height); // must reset back - render target is setting its own viewport
         renderTarget.getColorTexture().bind(shaderProgramPost, "textureRendered", 0);
+        renderTarget.getColorTexture().bind(shaderProgramPost, "textureWood", 1);
+        renderTarget.getColorTexture().bind(shaderProgramPost, "textureEarth", 2);
+
+
         if (triangleLine) {
             buffersPost.draw(GL_TRIANGLES, shaderProgramPost);
         } else
@@ -332,34 +363,41 @@ public class Renderer extends AbstractRenderer {
                             objType1 = 1;
                         break;
                         case GLFW_KEY_2:
-                        if (objType2 == 1) {
-                            objType2 = 0;
+                        if (objType1 == 2) {
+                            objType1 = 0;
                         } else
-                            objType2 = 1;
+                            objType1 = 2;
                         break;
                         case GLFW_KEY_3:
-                        if (objType2 == 2) {
-                            objType2 = 0;
-                        } else
-                            objType2 = 2;
-                        break;
-                        case GLFW_KEY_4:
                         if (objType1 == 3) {
-                            objType1= 0;
+                            objType1 = 0;
                         } else
                             objType1 = 3;
                         break;
-                    case GLFW_KEY_5:
+                        case GLFW_KEY_4:
                         if (objType1 == 4) {
                             objType1= 0;
                         } else
                             objType1 = 4;
                         break;
-                    case GLFW_KEY_6:
+                    case GLFW_KEY_5:
                         if (objType1 == 5) {
                             objType1= 0;
                         } else
                             objType1 = 5;
+                        break;
+                    case GLFW_KEY_6:
+                        if (objType1 == 6) {
+                            objType1= 0;
+                        } else
+                            objType1 = 6;
+                        break;
+                    case GLFW_KEY_9:
+                        if(objType2 ==3 ) {
+                            objType2 = 0;
+
+                        }else
+                            objType2= objType2+1;
                         break;
 
 

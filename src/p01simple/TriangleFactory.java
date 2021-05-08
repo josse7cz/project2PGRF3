@@ -44,7 +44,6 @@ public class TriangleFactory {
                 for (int x = 0; x < m; x++) {//lichý průchod
                     ib[index2++] = ((((k + 1) * n) - x) + (n - 1));
                     ib[index2++] = (((k * n) - x) + (n - 1));
-
                 }
                 index++;
                 if (k < n - 2) {
@@ -53,12 +52,8 @@ public class TriangleFactory {
                     ib[index2++] = (((k) * n) + (m));
 
                 }
-
             }
-
-
         }
-
 
         OGLBuffers.Attrib[] attributes = {
                 new OGLBuffers.Attrib("inPosition", 2)

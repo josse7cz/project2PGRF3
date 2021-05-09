@@ -3,16 +3,19 @@ in vec2 texCoord;
 in float typeTexture;
 in vec3 normal;
 uniform float type;
-uniform sampler2D textureMosaic;
-uniform sampler2D textureBall;
-uniform sampler2D textureWood;
-uniform sampler2D textureEarth;
+uniform sampler2D textureBall,textureWood,textureMosaic,textureEarth;
+
 out vec4 position;
 vec4 textureColor;
 out vec4 outColor;// output from the fragment shader
 vec2 coord;
 
 void main() {
+//ambient
+    float ambientStrength = 0.1f;
+    //vec3 ambient= ambientStrength*lightColor;
+
+
 
 
     vec3 nNormal=normalize(normal);

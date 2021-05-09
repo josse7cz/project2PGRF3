@@ -26,7 +26,7 @@ public class Renderer extends AbstractRenderer {
 
     private int shaderProgramMain, shaderProgramPost;
     private OGLBuffers buffersMain;
-    private int viewLocation, projectionLocation,  modelLocation, locTime, animace,typeLocation;
+    private int viewLocation, projectionLocation,  modelLocation, locTime, animace,typeLocation,lightColor;
     private Camera camera;
     private Mat4PerspRH projection;
     private Mat4OrthoRH orthoRH;
@@ -48,6 +48,7 @@ public class Renderer extends AbstractRenderer {
     private OGLTexture2D textureEarth;
 
 
+
     @Override
     public void init() {
         OGLUtils.printOGLparameters();
@@ -66,6 +67,7 @@ public class Renderer extends AbstractRenderer {
         typeLocation = glGetUniformLocation(shaderProgramMain, "type");
         locTime = glGetUniformLocation(shaderProgramMain, "time");
         scale=glGetUniformLocation(shaderProgramMain,"scale");
+        lightColor=glGetUniformLocation(shaderProgramMain,"lightCol");
 
 
 
@@ -146,9 +148,7 @@ public class Renderer extends AbstractRenderer {
         renderTarget.bind(); // render to texture
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         glUniformMatrix4fv(modelLocation, false, model.floatArray());
-
         glUniformMatrix4fv(viewLocation, false, camera.getViewMatrix().floatArray());
 
         if (projectionView) {
@@ -175,13 +175,13 @@ public class Renderer extends AbstractRenderer {
 
         if(objType1==0){
             textureMosaic.bind(shaderProgramMain, "textureMosaic", 0);
-           glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+           //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
         } else if(objType1==1){
             textureWood.bind(shaderProgramMain, "textureWood", 1);
         }
         else if(objType1==2){
             textureEarth.bind(shaderProgramMain,"textureEarth",2);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_LINE_STIPPLE_REPEAT);
+            //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_LINE_STIPPLE_REPEAT);
         }
         if(objType2==0){
             textureMosaic.bind(shaderProgramMain, "textureMosaic", 0);
@@ -200,7 +200,7 @@ public class Renderer extends AbstractRenderer {
 
             glUniform1f(typeLocation, objType1);
             glUniformMatrix4fv(modelLocation, false, new Mat4Transl(2, 0, 0).floatArray());
-            buffersMain.draw(GL_TRIANGLES, shaderProgramMain);
+                       buffersMain.draw(GL_TRIANGLES, shaderProgramMain);
 
             glUniform1f(typeLocation, objType2);
 //        glUniformMatrix4fv(..., false, new Mat4Transl(camera.getPosition()).floatArray());
@@ -227,6 +227,7 @@ public class Renderer extends AbstractRenderer {
     float SHINE_ALL_DIRECTIONS = 1;
     float[] lightPos = {-30, 0, 0, SHINE_ALL_DIRECTIONS};
     float[] lightColorAmbient = {0.2f, 0.2f, 0.2f, 1f};
+    float[] lightColorDiffuse = {0.2f, 0.2f, 0.2f, 1f};
     float[] lightColorSpecular = {0.8f, 0.8f, 0.8f, 1f};
 
     private void renderPostProcessing() {

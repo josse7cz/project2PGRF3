@@ -8,21 +8,17 @@ uniform float type,time,scale;
 uniform vec4 position;
 out float typeTexture;
 out vec2 texCoord;
-out vec3 normal;
+out vec3 normal, fragPos;
 
 
 
 vec3 normalCalculation(in vec2 inPosition){
-
     float distance = sqrt(inPosition.x*inPosition.x+inPosition.y*inPosition.y);
     normal.x=scale*PI*sin(distance)/distance*inPosition.x;
     normal.y=scale*PI*sin(distance)/distance*inPosition.y;
     normal.z=1.0;
     return normal;
 }
-
-
-
 
 /*
 tělesa
@@ -49,21 +45,8 @@ vec3 getEarth(vec2 vec) { //Earth
     float x = r * cos(az) * cos(ze);
     float y = 2* r * sin(az) * cos(ze);
     float z = 0.5 * r * sin(ze)*2.5;
-    //kdyztak smaz
-    //    float x= sin(PI*ze)*cos(2*PI*az);
-    //    float y= sin(PI*ze)*sin(2*PI*az);
-    //    float z= cos(PI*ze);
-    //
-    return vec3(x, y, z);
 
-    //    float s =PI * 0.5 - PI * vec.x;
-    //    float t = 2* PI * vec.y;
-    //    float r = 2;
-    //
-    //    return vec3(
-    //    cos(t) * cos(s) * r*0.5,
-    //    sin(t) * cos(s) * r*0.5,
-    //    sin(s) * r*0.5);
+    return vec3(x, y, z);
 
 }
 vec3 getElephant(vec2 vec) {
@@ -93,14 +76,7 @@ void main() {
     vec2 position = inPosition * 2 - 1;// grid je <0;1> - chci <-1;1>
     texCoord = inPosition;
     normal=normalCalculation(position.xy);
-
-
-
-    //    vec3 normal = normalize(normal(inPosition.x, inPosition.y));//normála
-    //    normal = inverse(transpose(mat3(matMV)))*normal;
-    //    vec3 lightDirection = normalize(lightSource - posMV.xyz);
-    //    intensity = dot(lightDirection, normal);
-    //    vertColor = vec3(normal.xyz);
+    fragPos=vec3(model*vec4(vec2 (inPosition),1.0f,1.0f));
 
 
     vec3 finalPosition;
@@ -108,9 +84,8 @@ void main() {
         finalPosition = getSphere(position);
         typeTexture=0;
     }
-    //         if (type==15){
-    //            finalPosition = getJuicer();
-    //        }
+
+
     if (type==1) {
         finalPosition = vec3(position, getJuicer(position));
         typeTexture=1;
@@ -131,7 +106,7 @@ void main() {
     //        typeTexture=5;
     //    }
 
-    
+
     gl_Position = projection * view *model*vec4(finalPosition, 1.0);
 
 

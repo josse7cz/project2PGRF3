@@ -1,0 +1,2 @@
+Modelování – teselace, GS, transfer feedback
+-Generování těles – kulová plocha s různým rozlišením  - určení souřadnic i normály

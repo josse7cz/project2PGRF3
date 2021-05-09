@@ -26,7 +26,7 @@ public class Renderer extends AbstractRenderer {
 
     private int shaderProgramMain, shaderProgramPost;
     private OGLBuffers buffersMain;
-    private int viewLocation, projectionLocation,  modelLocation, locTime, animace,typeLocation,lightColor;
+    private int viewLocation, projectionLocation,  modelLocation, locTime, animace,typeLocation,lightColorLoc,objectColorLoc,lightPosLoc, viewPosLoc;
     private Camera camera;
     private Mat4PerspRH projection;
     private Mat4OrthoRH orthoRH;
@@ -67,7 +67,13 @@ public class Renderer extends AbstractRenderer {
         typeLocation = glGetUniformLocation(shaderProgramMain, "type");
         locTime = glGetUniformLocation(shaderProgramMain, "time");
         scale=glGetUniformLocation(shaderProgramMain,"scale");
-        lightColor=glGetUniformLocation(shaderProgramMain,"lightCol");
+        objectColorLoc=glGetUniformLocation(shaderProgramMain,"objectCol");
+        lightColorLoc=glGetUniformLocation(shaderProgramMain,"lightColor");
+        lightPosLoc=glGetUniformLocation(shaderProgramMain,"lightPos");
+        viewPosLoc=glGetUniformLocation(shaderProgramMain,"viewtPos");
+
+       
+
 
 
 
@@ -150,6 +156,10 @@ public class Renderer extends AbstractRenderer {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glUniformMatrix4fv(modelLocation, false, model.floatArray());
         glUniformMatrix4fv(viewLocation, false, camera.getViewMatrix().floatArray());
+        glUniform3f(objectColorLoc,1.0f,0.5f,0.31f);
+        glUniform3f(lightColorLoc,1.0f,0.5f,1.0f);
+        glUniform3f(lightPosLoc,1.0f,0.5f,1.0f);
+        glUniform3f(viewPosLoc,(float) camera.getPosition().getX(),(float)camera.getPosition().getY(),(float)camera.getPosition().getZ());
 
         if (projectionView) {
             glUniformMatrix4fv(projectionLocation, false, projection.floatArray());

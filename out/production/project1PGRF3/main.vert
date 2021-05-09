@@ -1,5 +1,6 @@
 #version 150
 in vec2 inPosition;// input from the vertex buffer
+
 const float PI = 3.1415;
 uniform mat4 view;
 uniform mat4 projection;
@@ -8,7 +9,8 @@ uniform float type,time,scale;
 uniform vec4 position;
 out float typeTexture;
 out vec2 texCoord;
-out vec3 normal, fragPos;
+
+out vec3 normal, FragPos,Normal;
 
 
 
@@ -76,8 +78,9 @@ void main() {
     vec2 position = inPosition * 2 - 1;// grid je <0;1> - chci <-1;1>
     texCoord = inPosition;
     normal=normalCalculation(position.xy);
-    fragPos=vec3(model*vec4(vec2 (inPosition),1.0f,1.0f));
-
+    FragPos=vec3(vec2(inPosition),1.0f);
+    //FragPos=vec3(model*vec4(vec2 (inPosition),1.0f,1.0f));
+    Normal=mat3(transpose(inverse(model)))*normal;
 
     vec3 finalPosition;
     if (type == 0) {

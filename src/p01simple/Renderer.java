@@ -1,5 +1,4 @@
 package p01simple;
-//package lvl2advanced.p01gui.p01simple;
 
 import lwjglutils.*;
 import org.lwjgl.glfw.GLFWCursorPosCallback;
@@ -7,9 +6,7 @@ import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.glfw.GLFWMouseButtonCallback;
 import org.lwjgl.glfw.GLFWScrollCallback;
 import transforms.*;
-
 import java.io.IOException;
-
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.*;
@@ -26,27 +23,26 @@ public class Renderer extends AbstractRenderer {
 
     private int shaderProgramMain, shaderProgramPost;
     private OGLBuffers buffersMain;
-    private int viewLocation, projectionLocation,  modelLocation, locTime, animace,typeLocation,lightColorLoc,objectColorLoc,lightPosLoc, viewPosLoc;
+    private int viewLocation, projectionLocation, modelLocation, locTime, animace, typeLocation, lightColor, objectColorLoc, lightPosLoc, viewPosLoc;
     private Camera camera;
     private Mat4PerspRH projection;
     private Mat4OrthoRH orthoRH;
     private Mat4 model;
-    private OGLTexture2D textureMosaic,textureBall,textureWood;
+    private OGLTexture2D textureMosaic, textureBall, textureWood;
     private OGLBuffers buffersPost;
     private boolean mousePressed, line, orthoView, triangleLine = false;
     private boolean projectionView = true;
     private double oldMx, oldMy;
     private float time = 1;
-    private float scale = 1;
+
 
     private OGLRenderTarget renderTarget;
     private OGLTexture2D.Viewer viewer;
     private double a = 0;
 
     private boolean point;
-    private float objType2=1,objType1=0;
+    private float objType2 = 1, objType1 = 0;
     private OGLTexture2D textureEarth;
-
 
 
     @Override
@@ -66,15 +62,10 @@ public class Renderer extends AbstractRenderer {
         projectionLocation = glGetUniformLocation(shaderProgramMain, "projection");
         typeLocation = glGetUniformLocation(shaderProgramMain, "type");
         locTime = glGetUniformLocation(shaderProgramMain, "time");
-        scale=glGetUniformLocation(shaderProgramMain,"scale");
-        objectColorLoc=glGetUniformLocation(shaderProgramMain,"objectCol");
-        lightColorLoc=glGetUniformLocation(shaderProgramMain,"lightColor");
-        lightPosLoc=glGetUniformLocation(shaderProgramMain,"lightPos");
-        viewPosLoc=glGetUniformLocation(shaderProgramMain,"viewtPos");
-
-       
-
-
+        objectColorLoc = glGetUniformLocation(shaderProgramMain, "objectCol");
+        lightColor = glGetUniformLocation(shaderProgramMain, "lightColor");
+        lightPosLoc = glGetUniformLocation(shaderProgramMain, "lightPos");
+        viewPosLoc = glGetUniformLocation(shaderProgramMain, "viewPos");
 
 
         camera = new Camera()
@@ -94,11 +85,11 @@ public class Renderer extends AbstractRenderer {
                 20 * width / (float) height,
                 0.1,
                 20);
-//        (-20 * width / (float) height, 20 * width / (float) height, -20, 20, 0.1f, 100.0f)
+
 
         if (triangleLine) {
             buffersMain = GridFactory.generateGrid(200, 200);
-            buffersPost = GridFactory.generateGrid(200,200);
+            buffersPost = GridFactory.generateGrid(200, 200);
         } else
             buffersMain = TriangleFactory.generateTriangle(200, 200);
         buffersPost = TriangleFactory.generateTriangle(200, 200);
@@ -107,9 +98,8 @@ public class Renderer extends AbstractRenderer {
 
         try {
             textureMosaic = new OGLTexture2D("./mosaic.jpg");
-            textureWood=new OGLTexture2D("./woodTexture.jpg");
-            textureEarth=new OGLTexture2D("./globe.jpg");
-            //textureBall=new OGLTexture2D("./Ball11.jpg");
+            textureWood = new OGLTexture2D("./woodTexture.jpg");
+            textureEarth = new OGLTexture2D("./globe.jpg");
 
 
         } catch (IOException e) {
@@ -128,45 +118,38 @@ public class Renderer extends AbstractRenderer {
 
         if (line) {
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-            point=false;
+            point = false;
         }
-        if (point){
+        if (point) {
             glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
-            line=false;
+            line = false;
         }
-
-
         renderMain();
         renderPostProcessing();
-
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         glDisable(GL_DEPTH_TEST);
-         viewer.view(textureWood, -1, -1, 0.5);//zobrazení textury vlevo dole
-         viewer.view(renderTarget.getColorTexture(), -1, -0.5, 0.5);
+        viewer.view(textureEarth, -1, -1, 0.5);//zobrazení textury vlevo dole
+        viewer.view(renderTarget.getColorTexture(), -1, -0.5, 0.5);
         viewer.view(renderTarget.getDepthTexture(), -1, 0, 0.5);
         textRenderer.addStr2D(width - 90, height - 3, " (c) PGRF UHK");
         textRenderer.addStr2D(2, 20, " Návod pro použítí");
-
     }
 
     private void renderMain() {
         glUseProgram(shaderProgramMain);
         renderTarget.bind(); // render to texture
-
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glUniformMatrix4fv(modelLocation, false, model.floatArray());
         glUniformMatrix4fv(viewLocation, false, camera.getViewMatrix().floatArray());
-        glUniform3f(objectColorLoc,1.0f,0.5f,0.31f);
-        glUniform3f(lightColorLoc,1.0f,0.5f,1.0f);
-        glUniform3f(lightPosLoc,1.0f,0.5f,1.0f);
-        glUniform3f(viewPosLoc,(float) camera.getPosition().getX(),(float)camera.getPosition().getY(),(float)camera.getPosition().getZ());
-
+        glUniform3f(objectColorLoc, 1.0f, 0.5f, 0.31f);
+        glUniform3f(lightColor, 1.0f, 0.5f, 1.0f);
+        glUniform3f(lightPosLoc, 1.0f, 0.5f, -5.0f);
+        glUniform3f(viewPosLoc, (float) camera.getPosition().getX(), (float) camera.getPosition().getY(), (float) camera.getPosition().getZ());
         if (projectionView) {
             glUniformMatrix4fv(projectionLocation, false, projection.floatArray());
         }//projection
         else if (orthoView) {
             glUniformMatrix4fv(projectionLocation, false, orthoRH.floatArray());
-
         }
         glUniform1f(locTime, time);
 
@@ -182,24 +165,20 @@ public class Renderer extends AbstractRenderer {
             } else a = 0;
         }
 
-
-        if(objType1==0){
+        if (objType1 == 0) {
             textureMosaic.bind(shaderProgramMain, "textureMosaic", 0);
-           //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-        } else if(objType1==1){
+            //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+        } else if (objType1 == 1) {
             textureWood.bind(shaderProgramMain, "textureWood", 1);
+        } else if (objType1 == 2) {
+            textureEarth.bind(shaderProgramMain, "textureEarth", 2);
         }
-        else if(objType1==2){
-            textureEarth.bind(shaderProgramMain,"textureEarth",2);
-            //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_LINE_STIPPLE_REPEAT);
-        }
-        if(objType2==0){
+        if (objType2 == 0) {
             textureMosaic.bind(shaderProgramMain, "textureMosaic", 0);
-        }else if(objType2==1){
+        } else if (objType2 == 1) {
             textureWood.bind(shaderProgramMain, "textureWood", 1);
-        }
-        else if(objType2==2){
-            textureEarth.bind(shaderProgramMain,"textureEarth",2);
+        } else if (objType2 == 2) {
+            textureEarth.bind(shaderProgramMain, "textureEarth", 2);
         }
 
         /*
@@ -210,7 +189,7 @@ public class Renderer extends AbstractRenderer {
 
             glUniform1f(typeLocation, objType1);
             glUniformMatrix4fv(modelLocation, false, new Mat4Transl(2, 0, 0).floatArray());
-                       buffersMain.draw(GL_TRIANGLES, shaderProgramMain);
+            buffersMain.draw(GL_TRIANGLES, shaderProgramMain);
 
             glUniform1f(typeLocation, objType2);
 //        glUniformMatrix4fv(..., false, new Mat4Transl(camera.getPosition()).floatArray());
@@ -226,19 +205,7 @@ public class Renderer extends AbstractRenderer {
         glUniformMatrix4fv(modelLocation, false, new Mat4Transl(-1.5, -0.5, 0).floatArray());
         buffersMain.draw(GL_TRIANGLE_STRIP, shaderProgramMain);
 
-
     }
-
-    /*
-    osvetleni
-     */
-    // nastaveni svetla
-    // Prepare light parameters.
-    float SHINE_ALL_DIRECTIONS = 1;
-    float[] lightPos = {-30, 0, 0, SHINE_ALL_DIRECTIONS};
-    float[] lightColorAmbient = {0.2f, 0.2f, 0.2f, 1f};
-    float[] lightColorDiffuse = {0.2f, 0.2f, 0.2f, 1f};
-    float[] lightColorSpecular = {0.8f, 0.8f, 0.8f, 1f};
 
     private void renderPostProcessing() {
         glUseProgram(shaderProgramPost);
@@ -292,7 +259,7 @@ public class Renderer extends AbstractRenderer {
         }
     };
     /*
-    metoda pro priblizeni koleckem mysi
+    mouse scroll
      */
     private final GLFWScrollCallback scrollCallback = new GLFWScrollCallback() {
         @Override
@@ -302,10 +269,9 @@ public class Renderer extends AbstractRenderer {
         }
     };
 
-
     /*
-            metoda pro zpracovani vstupu z klavesnice
-             */
+     keyboard
+    */
     private final GLFWKeyCallback keyCallback = new GLFWKeyCallback() {
         @Override
         public void invoke(long window, int key, int scancode, int action, int mods) {
@@ -335,10 +301,10 @@ public class Renderer extends AbstractRenderer {
                             line = true;
                         } else line = false;
                         break;
-                        case GLFW_KEY_P:
+                    case GLFW_KEY_P:
                         if (!point) {
                             point = true;
-                            line=false;
+                            line = false;
                         } else point = false;
                         break;
 
@@ -363,51 +329,54 @@ public class Renderer extends AbstractRenderer {
                         } else
                             animace = 1;
                         break;
-                        case GLFW_KEY_1:
+                    case GLFW_KEY_1:
                         if (objType1 == 1) {
                             objType1 = 0;
                         } else
                             objType1 = 1;
                         break;
-                        case GLFW_KEY_2:
+                    case GLFW_KEY_2:
                         if (objType1 == 2) {
                             objType1 = 0;
                         } else
                             objType1 = 2;
                         break;
-                        case GLFW_KEY_3:
+                    case GLFW_KEY_3:
                         if (objType1 == 3) {
                             objType1 = 0;
                         } else
                             objType1 = 3;
                         break;
-                        case GLFW_KEY_4:
+                    case GLFW_KEY_4:
                         if (objType1 == 4) {
-                            objType1= 0;
+                            objType1 = 0;
                         } else
                             objType1 = 4;
                         break;
                     case GLFW_KEY_5:
                         if (objType1 == 5) {
-                            objType1= 0;
+                            objType1 = 0;
                         } else
                             objType1 = 5;
                         break;
                     case GLFW_KEY_6:
                         if (objType1 == 6) {
-                            objType1= 0;
+                            objType1 = 0;
                         } else
                             objType1 = 6;
                         break;
+
                     case GLFW_KEY_9:
-                        if(objType2 ==3 ) {
+                        if (objType2 == 8) {
                             objType2 = 0;
 
-                        }else
-                            objType2= objType2+1;
+                        } else
+                            objType2 = objType2 + 1;
                         break;
-
-
+                        case GLFW_KEY_LEFT_SHIFT:
+                        objType2 = 0;
+                        objType1 = 0;
+                        break;
                     default:
                 }
 

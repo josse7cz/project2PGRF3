@@ -26,7 +26,7 @@ public class Renderer extends AbstractRenderer {
 
     private int shaderProgramMain, shaderProgramPost;
     private OGLBuffers buffersMain;
-    private int viewLocation, projectionLocation,  modelLocation, locTime, animace;
+    private int viewLocation, projectionLocation,  modelLocation, locTime, animace,typeLocation;
     private Camera camera;
     private Mat4PerspRH projection;
     private Mat4OrthoRH orthoRH;
@@ -37,10 +37,12 @@ public class Renderer extends AbstractRenderer {
     private boolean projectionView = true;
     private double oldMx, oldMy;
     private float time = 1;
+    private float scale = 1;
+
     private OGLRenderTarget renderTarget;
     private OGLTexture2D.Viewer viewer;
     private double a = 0;
-    private int typeLocation;
+
     private boolean point;
     private float objType2=1,objType1=0;
     private OGLTexture2D textureEarth;
@@ -63,6 +65,7 @@ public class Renderer extends AbstractRenderer {
         projectionLocation = glGetUniformLocation(shaderProgramMain, "projection");
         typeLocation = glGetUniformLocation(shaderProgramMain, "type");
         locTime = glGetUniformLocation(shaderProgramMain, "time");
+        scale=glGetUniformLocation(shaderProgramMain,"scale");
 
 
 
@@ -111,13 +114,6 @@ public class Renderer extends AbstractRenderer {
 
     @Override
     public void display() {
-
-//        textureMosaic.bind(shaderProgramMain,"textureMosaic",0);
-//        textureWood.bind(shaderProgramMain,"textureWood",1);
-//        textureEarth.bind(shaderProgramMain,"textureEarth",2);
-
-
-
 
         glEnable(GL_DEPTH_TEST);
         // text-renderer disables depth-test (z-buffer)

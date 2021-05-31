@@ -6,9 +6,6 @@ uniform float width;
 uniform float height;
 out vec4 outColor; // output from the fragment shader
 vec4 finalColor;
-vec2 blurTextureCoord[11];
-
-
 
 void main() {
 	vec4 depth = texture (textureDepth,texCoord);
@@ -19,10 +16,7 @@ void main() {
 	vec4 textureColorDown = texture(textureRendered,vec2(texCoord.x, (texCoord.y-1)/height));
 
 
-
-
 //if(depth.g>0.5){
-
 
 	finalColor = (textureColor*4f+textureColorUp)/6f;
 	finalColor = (textureColor*4f+textureColorDown)/6f;
@@ -30,7 +24,7 @@ void main() {
 	finalColor = (textureColor*4f+textureColorRight)/6f;
 
 
-outColor+=finalColor;
+	outColor+=finalColor;
 
 //}
 

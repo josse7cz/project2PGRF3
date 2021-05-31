@@ -23,7 +23,7 @@ public class Renderer extends AbstractRenderer {
 
     private int shaderProgramMain, shaderProgramPost;
     private OGLBuffers buffersMain;
-    private int viewLocation, projectionLocation, modelLocation, locTime, animace, typeLocation, lightColor, objectColorLoc, lightPosLoc, viewPosLoc;
+    private int viewLocation, projectionLocation, modelLocation, locTime, animace, typeLocation, lightColor, objectColorLoc, lightPosLoc, viewPosLoc,widthBlur,heightBlur;
     private Camera camera;
     private Mat4PerspRH projection;
     private Mat4OrthoRH orthoRH;
@@ -66,6 +66,9 @@ public class Renderer extends AbstractRenderer {
         lightColor = glGetUniformLocation(shaderProgramMain, "lightColor");
         lightPosLoc = glGetUniformLocation(shaderProgramMain, "lightPos");
         viewPosLoc = glGetUniformLocation(shaderProgramMain, "viewPos");
+        widthBlur=glGetUniformLocation(shaderProgramMain,"widthBlur");
+        heightBlur=glGetUniformLocation(shaderProgramMain,"heightBlur");
+
 
 
         camera = new Camera()
@@ -169,16 +172,16 @@ public class Renderer extends AbstractRenderer {
             textureMosaic.bind(shaderProgramMain, "textureMosaic", 0);
             //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
         } else if (objType1 == 1) {
-            textureWood.bind(shaderProgramMain, "textureWood", 1);
+            textureWood.bind(shaderProgramMain, "textureWood", 0);
         } else if (objType1 == 2) {
-            textureEarth.bind(shaderProgramMain, "textureEarth", 2);
+            textureEarth.bind(shaderProgramMain, "textureEarth", 0);
         }
         if (objType2 == 0) {
             textureMosaic.bind(shaderProgramMain, "textureMosaic", 0);
         } else if (objType2 == 1) {
-            textureWood.bind(shaderProgramMain, "textureWood", 1);
+            textureWood.bind(shaderProgramMain, "textureWood", 0);
         } else if (objType2 == 2) {
-            textureEarth.bind(shaderProgramMain, "textureEarth", 2);
+            textureEarth.bind(shaderProgramMain, "textureEarth", 0);
         }
 
         /*
@@ -212,9 +215,14 @@ public class Renderer extends AbstractRenderer {
         glBindFramebuffer(GL_FRAMEBUFFER, 0); // render to window
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, width, height); // must reset back - render target is setting its own viewport
+        glUniform1f(width,renderTarget.getWidth());
+        glUniform1f(height,renderTarget.getHeight());
+
+
         renderTarget.getColorTexture().bind(shaderProgramPost, "textureRendered", 0);
-        renderTarget.getColorTexture().bind(shaderProgramPost, "textureWood", 1);
-        renderTarget.getColorTexture().bind(shaderProgramPost, "textureEarth", 2);
+        renderTarget.getDepthTexture().bind(shaderProgramPost,"textureDepth",1);
+//      renderTarget.getColorTexture().bind(shaderProgramPost, "textureWood", 1);
+//      renderTarget.getColorTexture().bind(shaderProgramPost, "textureEarth", 2);
 
 
         if (triangleLine) {

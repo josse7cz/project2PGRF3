@@ -11,14 +11,14 @@ vec4 textureColor;
 
 void main() {
     //ambient
-    float ambientStrength = 11.1f;
+    float ambientStrength = 8.1f;
     vec3 ambient= ambientStrength*lightColor;
     //diffuse
     vec3 lightDir=normalize(lightPos-FragPos);
     float diff=max(dot(normal,lightDir),0.0);
     vec3 diffuse=diff*lightColor;
     //specular
-    float specularStrength=20.5f;
+    float specularStrength=8.5f;
     vec3 viewDir=normalize(viewPos-FragPos);
     vec3 reflectDir = reflect (-lightDir,normal);
     float spec= pow(max(dot(viewDir,reflectDir),0.0),25);

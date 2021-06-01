@@ -6,7 +6,9 @@ import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.glfw.GLFWMouseButtonCallback;
 import org.lwjgl.glfw.GLFWScrollCallback;
 import transforms.*;
+
 import java.io.IOException;
+
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.*;
@@ -23,26 +25,22 @@ public class Renderer extends AbstractRenderer {
 
     private int shaderProgramMain, shaderProgramPost;
     private OGLBuffers buffersMain;
-    private int viewLocation, projectionLocation, modelLocation, locTime, animace, typeLocation, lightColor, objectColorLoc, lightPosLoc, viewPosLoc;
+    private int viewLocation, projectionLocation, modelLocation, locTime, anim, objType, lightColor, objectColorLoc, lightPosLoc, viewPosLoc;
     private Camera camera;
     private Mat4PerspRH projection;
     private Mat4OrthoRH orthoRH;
     private Mat4 model;
-    private OGLTexture2D textureMosaic, textureWood;
+    private OGLTexture2D textureMosaic, textureEarth;
     private OGLBuffers buffersPost;
     private boolean mousePressed, line, orthoView, triangleLine = false;
     private boolean projectionView = true;
     private double oldMx, oldMy;
     private float time = 1;
-
-
     private OGLRenderTarget renderTarget;
     private OGLTexture2D.Viewer viewer;
     private double a = 0;
-
     private boolean point;
-    private float objType2 = 0, objType1 = 0;
-    private OGLTexture2D textureEarth;
+    private float obj1 = 1, obj2 = 2;
 
 
     @Override
@@ -60,7 +58,7 @@ public class Renderer extends AbstractRenderer {
         modelLocation = glGetUniformLocation(shaderProgramMain, "model");
         viewLocation = glGetUniformLocation(shaderProgramMain, "view");
         projectionLocation = glGetUniformLocation(shaderProgramMain, "projection");
-        typeLocation = glGetUniformLocation(shaderProgramMain, "type");
+        objType = glGetUniformLocation(shaderProgramMain, "type");
         locTime = glGetUniformLocation(shaderProgramMain, "time");
         objectColorLoc = glGetUniformLocation(shaderProgramMain, "objectCol");
         lightColor = glGetUniformLocation(shaderProgramMain, "lightColor");
@@ -88,8 +86,8 @@ public class Renderer extends AbstractRenderer {
 
 
         if (triangleLine) {
-            buffersMain = GridFactory.generateGrid(200, 200);
-            buffersPost = GridFactory.generateGrid(200, 200);
+            buffersMain = GridFactory.generateGrid(20, 20);
+            buffersPost = GridFactory.generateGrid(20, 20);
         } else
             buffersMain = TriangleFactory.generateTriangle(200, 200);
         buffersPost = TriangleFactory.generateTriangle(200, 200);
@@ -98,7 +96,6 @@ public class Renderer extends AbstractRenderer {
 
         try {
             textureMosaic = new OGLTexture2D("./mosaic.jpg");
-            textureWood = new OGLTexture2D("./woodTexture.jpg");
             textureEarth = new OGLTexture2D("./globe.jpg");
 
 
@@ -153,7 +150,7 @@ public class Renderer extends AbstractRenderer {
         }
         glUniform1f(locTime, time);
 
-        if (animace == 1) {
+        if (anim == 1) {
             if (a < 30) {
                 time += 0.1;
                 a = a + 0.1;
@@ -165,248 +162,212 @@ public class Renderer extends AbstractRenderer {
             } else a = 0;
         }
 
-        if (objType1 == 0) {
+        if (obj1 == 0) {
             textureMosaic.bind(shaderProgramMain, "textureMosaic", 0);
-            //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-        } else if (objType1 == 1) {
-            textureMosaic.bind(shaderProgramMain, "textureMosaic", 0);
-        } else if (objType1 == 2) {
-            textureEarth.bind(shaderProgramMain, "textureMosaic", 0);
-        }
-        if (objType2 == 0) {
-            textureMosaic.bind(shaderProgramMain, "textureMosaic", 0);
-        } else if (objType2 == 1) {
-            textureMosaic.bind(shaderProgramMain, "textureMosaic", 0);
-        } else if (objType2 == 2) {
-            textureEarth.bind(shaderProgramMain, "textureEarth", 0);
-        }
 
+        }  if (obj1 == 1) {
+            textureMosaic.bind(shaderProgramMain, "textureMosaic", 0);
+        } if (obj1 == 2) {
+            textureEarth.bind(shaderProgramMain, "textureMosaic", 0);
+        }  if (obj1 == 3) {
+            textureMosaic.bind(shaderProgramMain, "textureMosaic", 0);
+        }
+        if (obj2 == 0) {
+            textureMosaic.bind(shaderProgramMain, "textureMosaic", 0);
+        }  if (obj2 == 1) {
+            textureMosaic.bind(shaderProgramMain, "textureMosaic", 0);
+        } if (obj2 == 2) {
+            textureEarth.bind(shaderProgramMain, "textureMosaic", 0);
+        } if (obj2 == 3) {
+            textureMosaic.bind(shaderProgramMain, "textureMosaic", 0);
+        }
         /*
         objekty
          */
 
-        if (triangleLine) {
+            if (triangleLine) {
 
-            glUniform1f(typeLocation, objType1);
+                glUniform1f(objType, obj1);
+                glUniformMatrix4fv(modelLocation, false, new Mat4Transl(2, 0, 0).floatArray());
+                buffersMain.draw(GL_TRIANGLES, shaderProgramMain);
+
+                glUniform1f(objType, obj2);
+
+                glUniformMatrix4fv(modelLocation, false, new Mat4Transl(-2, 0, 0).floatArray());
+                buffersMain.draw(GL_TRIANGLES, shaderProgramMain);
+            } else
+                glUniform1f(objType, obj1);
             glUniformMatrix4fv(modelLocation, false, new Mat4Transl(2, 0, 0).floatArray());
-            buffersMain.draw(GL_TRIANGLES, shaderProgramMain);
+            buffersMain.draw(GL_TRIANGLE_STRIP, shaderProgramMain);
 
-            glUniform1f(typeLocation, objType2);
-//        glUniformMatrix4fv(..., false, new Mat4Transl(camera.getPosition()).floatArray());
-            glUniformMatrix4fv(modelLocation, false, new Mat4Transl(-2, 0, 0).floatArray());
-            buffersMain.draw(GL_TRIANGLES, shaderProgramMain);
-        } else
+            glUniform1f(objType, obj2);
+            glUniformMatrix4fv(modelLocation, false, new Mat4Transl(-1.5, -0.5, 0).floatArray());
+            buffersMain.draw(GL_TRIANGLE_STRIP, shaderProgramMain);
 
-            glUniform1f(typeLocation, objType1);//dalsi objekt
-        glUniformMatrix4fv(modelLocation, false, new Mat4Transl(2, 0, 0).floatArray());
-        buffersMain.draw(GL_TRIANGLE_STRIP, shaderProgramMain);
-
-        glUniform1f(typeLocation, objType2);
-        glUniformMatrix4fv(modelLocation, false, new Mat4Transl(-1.5, -0.5, 0).floatArray());
-        buffersMain.draw(GL_TRIANGLE_STRIP, shaderProgramMain);
-
-    }
-
-    private void renderPostProcessing() {
-        glUseProgram(shaderProgramPost);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0); // render to window
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glViewport(0, 0, width, height); // must reset back - render target is setting its own viewport
-        glUniform1f(width,renderTarget.getWidth());
-        glUniform1f(height,renderTarget.getHeight());
-
-
-        renderTarget.getColorTexture().bind(shaderProgramPost, "textureRendered", 0);
-        renderTarget.getDepthTexture().bind(shaderProgramPost,"textureDepth",1);
-//      renderTarget.getColorTexture().bind(shaderProgramPost, "textureWood", 1);
-//      renderTarget.getColorTexture().bind(shaderProgramPost, "textureEarth", 2);
-
-
-        if (triangleLine) {
-            buffersPost.draw(GL_TRIANGLES, shaderProgramPost);
-        } else
-            buffersPost.draw(GL_TRIANGLE_STRIP, shaderProgramPost);
-
-    }
-
-    private final GLFWCursorPosCallback cursorPosCallback = new GLFWCursorPosCallback() {
-        @Override
-        public void invoke(long window, double x, double y) {
-            if (mousePressed) {
-                camera = camera.addAzimuth(Math.PI / 2 * (oldMx - x) / width);
-                camera = camera.addZenith(Math.PI / 2 * (oldMy - y) / height);
-                oldMx = x;
-                oldMy = y;
-            }
         }
-    };
 
-    private final GLFWMouseButtonCallback mouseButtonCallback = new GLFWMouseButtonCallback() {
-        @Override
-        public void invoke(long window, int button, int action, int mods) {
-            if (button == GLFW_MOUSE_BUTTON_LEFT) {
-                double[] xPos = new double[1];
-                double[] yPos = new double[1];
-                glfwGetCursorPos(window, xPos, yPos);
-                oldMx = xPos[0];
-                oldMy = yPos[0];
-                mousePressed = action == GLFW_PRESS;
-            }
-            if (button == GLFW_MOUSE_BUTTON_RIGHT) {
-                double[] il = new double[1];
-                double[] ik = new double[1];
-                glfwGetCursorPos(window, il, ik);
+        private void renderPostProcessing () {
+            glUseProgram(shaderProgramPost);
+            glBindFramebuffer(GL_FRAMEBUFFER, 0); // render to window
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glViewport(0, 0, width, height); // must reset back - render target is setting its own viewport
+            glUniform1f(width, renderTarget.getWidth());
+            glUniform1f(height, renderTarget.getHeight());
+            renderTarget.getColorTexture().bind(shaderProgramPost, "textureRendered", 0);
+            renderTarget.getDepthTexture().bind(shaderProgramPost, "textureDepth", 1);
 
-                model.mul(il[0] + oldMy);
-                mousePressed = action == GLFW_PRESS;
-                System.out.println("mouse right dodelat na rotaci" + il[0]);
-            }
+
+            if (triangleLine) {
+                buffersPost.draw(GL_TRIANGLES, shaderProgramPost);
+            } else
+                buffersPost.draw(GL_TRIANGLE_STRIP, shaderProgramPost);
         }
-    };
+
+        private final GLFWCursorPosCallback cursorPosCallback = new GLFWCursorPosCallback() {
+            @Override
+            public void invoke(long window, double x, double y) {
+                if (mousePressed) {
+                    camera = camera.addAzimuth(Math.PI / 2 * (oldMx - x) / width);
+                    camera = camera.addZenith(Math.PI / 2 * (oldMy - y) / height);
+                    oldMx = x;
+                    oldMy = y;
+                }
+            }
+        };
+
+        private final GLFWMouseButtonCallback mouseButtonCallback = new GLFWMouseButtonCallback() {
+            @Override
+            public void invoke(long window, int button, int action, int mods) {
+                if (button == GLFW_MOUSE_BUTTON_LEFT) {
+                    double[] xPos = new double[1];
+                    double[] yPos = new double[1];
+                    glfwGetCursorPos(window, xPos, yPos);
+                    oldMx = xPos[0];
+                    oldMy = yPos[0];
+                    mousePressed = action == GLFW_PRESS;
+                }
+                if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+                    double[] il = new double[1];
+                    double[] ik = new double[1];
+                    glfwGetCursorPos(window, il, ik);
+
+                    model.mul(il[0] + oldMy);
+                    mousePressed = action == GLFW_PRESS;
+                }
+            }
+        };
     /*
     mouse scroll
      */
-    private final GLFWScrollCallback scrollCallback = new GLFWScrollCallback() {
-        @Override
-        public void invoke(long window, double xoffset, double yoffset) {
-            camera = camera.forward(xoffset);
-            camera = camera.backward(yoffset);
-        }
-    };
+        private final GLFWScrollCallback scrollCallback = new GLFWScrollCallback() {
+            @Override
+            public void invoke(long window, double xoffset, double yoffset) {
+                camera = camera.forward(xoffset);
+                camera = camera.backward(yoffset);
+            }
+        };
 
     /*
      keyboard
     */
-    private final GLFWKeyCallback keyCallback = new GLFWKeyCallback() {
-        @Override
-        public void invoke(long window, int key, int scancode, int action, int mods) {
-            if (action == GLFW_PRESS || action == GLFW_REPEAT) {
-                double speed = 0.25;
-                switch (key) {
-                    case GLFW_KEY_W:
-                        camera = camera.down(speed);
-                        break;
-                    case GLFW_KEY_S:
-                        camera = camera.up(speed);
-                        break;
-                    case GLFW_KEY_A:
-                        camera = camera.right(speed);
-                        break;
-                    case GLFW_KEY_D:
-                        camera = camera.left(speed);
-                        break;
-                    case GLFW_KEY_KP_ADD:
-                        camera = camera.forward(speed);
-                        break;
-                    case GLFW_KEY_KP_SUBTRACT:
-                        camera = camera.backward(speed);
-                        break;
-                    case GLFW_KEY_L:
-                        if (!line) {
-                            line = true;
-                        } else line = false;
-                        break;
-                    case GLFW_KEY_P:
-                        if (!point) {
-                            point = true;
-                            line = false;
-                        } else point = false;
-                        break;
+        private final GLFWKeyCallback keyCallback = new GLFWKeyCallback() {
+            @Override
+            public void invoke(long window, int key, int scancode, int action, int mods) {
+                if (action == GLFW_PRESS || action == GLFW_REPEAT) {
+                    double speed = 0.25;
+                    switch (key) {
+                        case GLFW_KEY_W:
+                            camera = camera.down(speed);
+                            break;
+                        case GLFW_KEY_S:
+                            camera = camera.up(speed);
+                            break;
+                        case GLFW_KEY_A:
+                            camera = camera.right(speed);
+                            break;
+                        case GLFW_KEY_D:
+                            camera = camera.left(speed);
+                            break;
+                        case GLFW_KEY_KP_ADD:
+                            camera = camera.forward(speed);
+                            break;
+                        case GLFW_KEY_KP_SUBTRACT:
+                            camera = camera.backward(speed);
+                            break;
+                        case GLFW_KEY_L:
+                            if (!line) {
+                                line = true;
+                            } else line = false;
+                            break;
+                        case GLFW_KEY_P:
+                            if (!point) {
+                                point = true;
+                                line = false;
+                            } else point = false;
+                            break;
 
-                    case GLFW_KEY_O:
-                        if (!orthoView) {
-                            orthoView = true;
-                            projectionView = false;
-                        } else {
-                            projectionView = true;
-                            orthoView = false;
-                        }
-                        break;
+                        case GLFW_KEY_O:
+                            if (!orthoView) {
+                                orthoView = true;
+                                projectionView = false;
+                            } else {
+                                projectionView = true;
+                                orthoView = false;
+                            }
+                            break;
 
-                    case GLFW_KEY_M:
-                        if (!triangleLine) {
-                            triangleLine = true;
-                        } else triangleLine = false;
-                        break;
-                    case GLFW_KEY_Q:
-                        if (animace == 1) {
-                            animace = 0;
-                        } else
-                            animace = 1;
-                        break;
-                    case GLFW_KEY_1:
-                        if (objType1 == 1) {
-                            objType1 = 0;
-                        } else
-                            objType1 = 1;
-                        break;
-                    case GLFW_KEY_2:
-                        if (objType1 == 2) {
-                            objType1 = 0;
-                        } else
-                            objType1 = 2;
-                        break;
-                    case GLFW_KEY_3:
-                        if (objType1 == 3) {
-                            objType1 = 0;
-                        } else
-                            objType1 = 3;
-                        break;
-                    case GLFW_KEY_4:
-                        if (objType1 == 4) {
-                            objType1 = 0;
-                        } else
-                            objType1 = 4;
-                        break;
-                    case GLFW_KEY_5:
-                        if (objType1 == 5) {
-                            objType1 = 0;
-                        } else
-                            objType1 = 5;
-                        break;
-                    case GLFW_KEY_6:
-                        if (objType1 == 6) {
-                            objType1 = 0;
-                        } else
-                            objType1 = 6;
-                        break;
-
-                    case GLFW_KEY_9:
-                        if (objType2 == 8) {
-                            objType2 = 0;
-
-                        } else
-                            objType2 = objType2 + 1;
-                        break;
+                        case GLFW_KEY_M:
+                            if (!triangleLine) {
+                                triangleLine = true;
+                            } else triangleLine = false;
+                            break;
+                        case GLFW_KEY_Q:
+                            if (anim == 1) {
+                                anim = 0;
+                            } else
+                                anim = 1;
+                            break;
+                        case GLFW_KEY_1:
+                            if (obj1 <= 3) {
+                                obj1 = obj1 + 1;
+                            } else
+                                obj1 = 0;
+                            break;
+                        case GLFW_KEY_2:
+                            if (obj2 <= 3) {
+                                obj2 = obj2 + 1;
+                            } else
+                                obj2 = 0;
+                            break;
                         case GLFW_KEY_LEFT_SHIFT:
-                        objType2 = 0;
-                        objType1 = 0;
-                        break;
-                    default:
+                            obj2 = 0;
+                            obj1 = 0;
+                            break;
+                        default:
+                    }
+
                 }
-
             }
+        };
+
+
+        @Override
+        public GLFWCursorPosCallback getCursorCallback () {
+            return cursorPosCallback;
         }
-    };
+
+        @Override
+        public GLFWMouseButtonCallback getMouseCallback () {
+            return mouseButtonCallback;
+        }
+
+        public GLFWScrollCallback getScrollCallback () {
+            return scrollCallback;
+        }
+
+        public GLFWKeyCallback getKeyCallback () {
+            return keyCallback;
+        }
 
 
-    @Override
-    public GLFWCursorPosCallback getCursorCallback() {
-        return cursorPosCallback;
     }
-
-    @Override
-    public GLFWMouseButtonCallback getMouseCallback() {
-        return mouseButtonCallback;
-    }
-
-    public GLFWScrollCallback getScrollCallback() {
-        return scrollCallback;
-    }
-
-    public GLFWKeyCallback getKeyCallback() {
-        return keyCallback;
-    }
-
-
-}

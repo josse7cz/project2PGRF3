@@ -3,7 +3,7 @@ in vec2 texCoord;
 in float typeTexture;
 in vec3 normal,FragPos,Normal;
 uniform float type;
-uniform sampler2D textureWood,textureMosaic,textureEarth;
+uniform sampler2D textureMosaic,textureEarth;
 uniform vec3 lightPos,viewPos,objectCol,lightColor;
 out vec4 outColor, position;// output from the fragment shader
 vec2 coord;
@@ -24,23 +24,23 @@ void main() {
     float spec= pow(max(dot(viewDir,reflectDir),0.0),8);
     vec3 specular= specularStrength*spec*lightColor;
     vec3 result=(ambient+diffuse+specular)*objectCol;
-
     vec2 coord=mod(texCoord*vec2(2.0, 4.0), vec2(1.0, 1.0));
 
 
-    if (typeTexture==0){
-       // textureColor = texture(textureMosaic, coord);//texCoord);
-        outColor=texture(textureMosaic, texCoord)*vec4(result,1.0f);
-    }if (typeTexture==1){
-//        textureColor = texture(textureWood, texCoord);
-    outColor=texture(textureMosaic, texCoord)*vec4(result,1.0f);
-    }
+//    if (typeTexture==0){
+//
+//        outColor=texture(textureMosaic, texCoord)*vec4(result,1.0f);
+//    }if (typeTexture==1){
+//
+//    outColor=texture(textureMosaic, texCoord)*vec4(result,1.0f);
+//    }
     if (typeTexture==2){
-       // textureColor = texture(textureEarth, texCoord);
+
         outColor=texture(textureEarth, texCoord)*vec4(result,1.0f);
     }
 
-    else outColor=texture(textureEarth, texCoord)*vec4(result,1.0f);
+//    else
+outColor=texture(textureMosaic, texCoord)*vec4(result,1.0f);
 
    //outColor = textureColor;//only texture without light
 } 

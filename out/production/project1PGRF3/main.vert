@@ -5,11 +5,11 @@ const float PI = 3.1415;
 uniform mat4 view;
 uniform mat4 projection;
 uniform mat4 model;
-uniform float type,time,scale;
+uniform float type, time, scale;
 uniform vec4 position;
 out float typeTexture;
 out vec2 texCoord;
-out vec3 normal, FragPos,Normal;
+out vec3 normal, FragPos, Normal;
 
 
 
@@ -61,32 +61,26 @@ void main() {
     vec2 position = inPosition * 2 - 1;// grid je <0;1> - chci <-1;1>
     texCoord = inPosition;
     normal=normalCalculation(position.xy);
-    FragPos=vec3(model*vec4(vec2 (inPosition),1.0f,1.0f));
+    FragPos=vec3(model*vec4(vec2 (inPosition), 1.0f, 1.0f));
     Normal=mat3(transpose(inverse(view*model)))*normal;
 
-    vec3 finalPosition;
+    vec3 finalPosition;// =(1.0f,1.0f,1.0f);
     if (type == 0) {
         finalPosition = getSphere(position);
-        typeTexture=8;}
+        typeTexture=0;
+    }
     if (type==1) {
         finalPosition = vec3(position, getJuicer(position));
-        typeTexture=0;}
+      //  typeTexture=1;
+    }
     if (type==2) {
         finalPosition =  getEarth(position);
-        typeTexture=2; }
+       //typeTexture=0;
+    }
     if (type==3) {
         finalPosition =  getGrid(position);
-        typeTexture=2; }
-//    if (type==4) {
-//        finalPosition =  getElephant(position);
-//        typeTexture=0; }
-//    if (type==5) {
-//        finalPosition =  getSombrero(position);
-//        typeTexture=0; }
-
-    if (type==8) {
-        finalPosition = getSphere(position);
-        typeTexture=8; }
+       // typeTexture=0;
+    }
 
     gl_Position = projection * view *model*vec4(finalPosition, 1.0);
 

@@ -7,12 +7,12 @@ uniform float height;
 out vec4 outColor; // output from the fragment shader
 vec4 finalColor;
 float resolution=1980;//(width*height);
-const float radius=5;
+const float radius=10;
 vec2 dir;
 
 
 void main() {
-	dir = vec2(0.5f, 0.5f);//mozna chyba zde
+	dir = vec2(1.f, 1.f);//mozna chyba zde
 
 	vec4 sum = vec4(0.0);
 	vec2 tc = texCoord;

@@ -49,20 +49,7 @@ vec3 getEarth(vec2 vec) { //Earth
     return vec3(x, y, z);
 
 }
-vec3 getElephant(vec2 vec) {//lampa
-    float az=(vec.x+1)*PI;
-    float ze=(vec.y+1)*2*PI;
-    float r= 3+cos(4*ze);
-    float x = r*sin(ze)*cos(az);
-    float y = r*sin(ze)*sin(az);
-    float z = r*cos(ze);
-    return vec3(x*0.5, y*0.5, z*0.5);
-}
-vec3 getSombrero(vec2 vec) {//disk
-    float t=2*PI*vec.y;
-    float s=PI*0.5-PI*vec.x*2;
-    return vec3(t*cos(s)*0.5, t*(sin(s))*0.5, 2*sin(t)/2*0.5);
-}
+
 vec3 getGrid(vec2 vec) {
     float x = vec.x;
     float y = vec.y;
@@ -75,27 +62,27 @@ void main() {
     texCoord = inPosition;
     normal=normalCalculation(position.xy);
     FragPos=vec3(model*vec4(vec2 (inPosition),1.0f,1.0f));
-    Normal=mat3(transpose(inverse(model)))*normal;
+    Normal=mat3(transpose(inverse(view*model)))*normal;
 
     vec3 finalPosition;
     if (type == 0) {
         finalPosition = getSphere(position);
-        typeTexture=0;}
+        typeTexture=8;}
     if (type==1) {
         finalPosition = vec3(position, getJuicer(position));
-        typeTexture=1;}
+        typeTexture=0;}
     if (type==2) {
         finalPosition =  getEarth(position);
         typeTexture=2; }
     if (type==3) {
         finalPosition =  getGrid(position);
-        typeTexture=0; }
-    if (type==4) {
-        finalPosition =  getElephant(position);
-        typeTexture=0; }
-    if (type==5) {
-        finalPosition =  getSombrero(position);
-        typeTexture=0; }
+        typeTexture=2; }
+//    if (type==4) {
+//        finalPosition =  getElephant(position);
+//        typeTexture=0; }
+//    if (type==5) {
+//        finalPosition =  getSombrero(position);
+//        typeTexture=0; }
 
     if (type==8) {
         finalPosition = getSphere(position);

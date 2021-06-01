@@ -21,7 +21,7 @@ void main() {
     float specularStrength=8.5f;
     vec3 viewDir=normalize(viewPos-FragPos);
     vec3 reflectDir = reflect (-lightDir,normal);
-    float spec= pow(max(dot(viewDir,reflectDir),0.0),25);
+    float spec= pow(max(dot(viewDir,reflectDir),0.0),8);
     vec3 specular= specularStrength*spec*lightColor;
     vec3 result=(ambient+diffuse+specular)*objectCol;
 
@@ -29,14 +29,14 @@ void main() {
 
 
     if (typeTexture==0){
-        textureColor = texture(textureMosaic, coord);//texCoord);
+       // textureColor = texture(textureMosaic, coord);//texCoord);
         outColor=texture(textureMosaic, texCoord)*vec4(result,1.0f);
     }if (typeTexture==1){
-        textureColor = texture(textureWood, texCoord);
-
+//        textureColor = texture(textureWood, texCoord);
+    outColor=texture(textureMosaic, texCoord)*vec4(result,1.0f);
     }
     if (typeTexture==2){
-        textureColor = texture(textureEarth, texCoord);
+       // textureColor = texture(textureEarth, texCoord);
         outColor=texture(textureEarth, texCoord)*vec4(result,1.0f);
     }
 

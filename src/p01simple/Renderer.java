@@ -23,7 +23,7 @@ public class Renderer extends AbstractRenderer {
 
     private int shaderProgramMain, shaderProgramPost;
     private OGLBuffers buffersMain;
-    private int viewLocation, projectionLocation, modelLocation, locTime, animace, typeLocation, lightColor, objectColorLoc, lightPosLoc, viewPosLoc,widthBlur,heightBlur;
+    private int viewLocation, projectionLocation, modelLocation, locTime, animace, typeLocation, lightColor, objectColorLoc, lightPosLoc, viewPosLoc;
     private Camera camera;
     private Mat4PerspRH projection;
     private Mat4OrthoRH orthoRH;
@@ -41,7 +41,7 @@ public class Renderer extends AbstractRenderer {
     private double a = 0;
 
     private boolean point;
-    private float objType2 = 1, objType1 = 0;
+    private float objType2 = 0, objType1 = 0;
     private OGLTexture2D textureEarth;
 
 
@@ -66,9 +66,6 @@ public class Renderer extends AbstractRenderer {
         lightColor = glGetUniformLocation(shaderProgramMain, "lightColor");
         lightPosLoc = glGetUniformLocation(shaderProgramMain, "lightPos");
         viewPosLoc = glGetUniformLocation(shaderProgramMain, "viewPos");
-        widthBlur=glGetUniformLocation(shaderProgramMain,"widthBlur");
-        heightBlur=glGetUniformLocation(shaderProgramMain,"heightBlur");
-
 
 
         camera = new Camera()
@@ -145,8 +142,8 @@ public class Renderer extends AbstractRenderer {
         glUniformMatrix4fv(modelLocation, false, model.floatArray());
         glUniformMatrix4fv(viewLocation, false, camera.getViewMatrix().floatArray());
         glUniform3f(objectColorLoc, 0.31f, 0.31f, 0.31f);
-        glUniform3f(lightColor, 0.5f, 0.5f, 0.5f);
-        glUniform3f(lightPosLoc, 1.0f, 0.5f, -5.0f);
+        glUniform3f(lightColor, 0.5f, 0.5f, 0.6f);
+        glUniform3f(lightPosLoc, 1.0f, 0.5f, 3.0f);
         glUniform3f(viewPosLoc, (float) camera.getPosition().getX(), (float) camera.getPosition().getY(), (float) camera.getPosition().getZ());
         if (projectionView) {
             glUniformMatrix4fv(projectionLocation, false, projection.floatArray());
@@ -172,14 +169,14 @@ public class Renderer extends AbstractRenderer {
             textureMosaic.bind(shaderProgramMain, "textureMosaic", 0);
             //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
         } else if (objType1 == 1) {
-            textureWood.bind(shaderProgramMain, "textureWood", 0);
+            textureMosaic.bind(shaderProgramMain, "textureMosaic", 0);
         } else if (objType1 == 2) {
-            textureEarth.bind(shaderProgramMain, "textureEarth", 0);
+            textureEarth.bind(shaderProgramMain, "textureMosaic", 0);
         }
         if (objType2 == 0) {
             textureMosaic.bind(shaderProgramMain, "textureMosaic", 0);
         } else if (objType2 == 1) {
-            textureWood.bind(shaderProgramMain, "textureWood", 0);
+            textureMosaic.bind(shaderProgramMain, "textureMosaic", 0);
         } else if (objType2 == 2) {
             textureEarth.bind(shaderProgramMain, "textureEarth", 0);
         }

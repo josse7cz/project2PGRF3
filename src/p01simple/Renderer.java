@@ -28,7 +28,7 @@ public class Renderer extends AbstractRenderer {
     private Mat4PerspRH projection;
     private Mat4OrthoRH orthoRH;
     private Mat4 model;
-    private OGLTexture2D textureMosaic, textureBall, textureWood;
+    private OGLTexture2D textureMosaic, textureWood;
     private OGLBuffers buffersPost;
     private boolean mousePressed, line, orthoView, triangleLine = false;
     private boolean projectionView = true;
@@ -81,7 +81,7 @@ public class Renderer extends AbstractRenderer {
                 Math.PI / 3,
                 height / (float) width,
                 0.1,
-                20
+                30
         );
         orthoRH = new Mat4OrthoRH(
                 -20 * width / (float) height,

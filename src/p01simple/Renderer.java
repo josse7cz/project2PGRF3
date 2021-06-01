@@ -144,8 +144,8 @@ public class Renderer extends AbstractRenderer {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glUniformMatrix4fv(modelLocation, false, model.floatArray());
         glUniformMatrix4fv(viewLocation, false, camera.getViewMatrix().floatArray());
-        glUniform3f(objectColorLoc, 1.0f, 0.5f, 0.31f);
-        glUniform3f(lightColor, 1.0f, 0.5f, 1.0f);
+        glUniform3f(objectColorLoc, 0.31f, 0.31f, 0.31f);
+        glUniform3f(lightColor, 0.5f, 0.5f, 0.5f);
         glUniform3f(lightPosLoc, 1.0f, 0.5f, -5.0f);
         glUniform3f(viewPosLoc, (float) camera.getPosition().getX(), (float) camera.getPosition().getY(), (float) camera.getPosition().getZ());
         if (projectionView) {

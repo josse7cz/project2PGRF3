@@ -274,7 +274,7 @@ public class Renderer extends AbstractRenderer {
             @Override
             public void invoke(long window, int key, int scancode, int action, int mods) {
                 if (action == GLFW_PRESS || action == GLFW_REPEAT) {
-                    double speed = 0.25;
+                    double speed = 0.125;
                     switch (key) {
                         case GLFW_KEY_W:
                             camera = camera.down(speed);

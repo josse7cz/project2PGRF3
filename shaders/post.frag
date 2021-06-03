@@ -6,13 +6,13 @@ uniform float width;
 uniform float height;
 out vec4 outColor;// output from the fragment shader
 vec4 finalColor;
-float resolution=1920;//1080;//Math.sqrt(width*height);
+float resolution=1920;
 const float radius=8;
 vec2 dir;
 
 
 void main() {
-    dir = vec2(1.f, 1.f);//mozna chyba zde
+    dir = vec2(1.f, 1.f);
 
     vec4 sum = vec4(0.0);
     vec2 tc = texCoord;
@@ -23,8 +23,8 @@ void main() {
     vec4 depth = texture (textureDepth, texCoord);
 
 
-if (depth.r>0.991f){
-
+    if (depth.r>0.991f){
+        //Gauss metod blur
         sum += texture2D(textureRendered, vec2(tc.x - 4.0*blur*hstep, tc.y - 4.0*blur*vstep)) * 0.0162162162;
         sum += texture2D(textureRendered, vec2(tc.x - 3.0*blur*hstep, tc.y - 3.0*blur*vstep)) * 0.0540540541;
         sum += texture2D(textureRendered, vec2(tc.x - 2.0*blur*hstep, tc.y - 2.0*blur*vstep)) * 0.1216216216;
@@ -39,18 +39,12 @@ if (depth.r>0.991f){
     }
     else {
 
-        outColor=textureColor*vec4(0.6,0.6,0.8,1.0);
+        outColor=textureColor*vec4(0.6, 0.6, 0.8, 1.0);
     }
 
-
-
-    //	if (gl_FragCoord.y < 200) {//promenna pro cast obrazovky
-    //		float grey = textureColor.r * 0.33 + textureColor.g * 0.33 + textureColor.b * 0.33;
-    //		outColor = vec4(grey, grey, grey, 1);
-    //	} else {
-    //else		outColor=textureColor;
-    //
-    //	}
-    //outColor=vec4(depth.r,0,0,1);
+    if (gl_FragCoord.y < 200) { //promenna pro cast obrazovky
+        float grey = textureColor.r * 0.33 + textureColor.g * 0.33 + textureColor.b * 0.33;
+        outColor = vec4(grey, grey, grey, 1);
+    }
 
 }

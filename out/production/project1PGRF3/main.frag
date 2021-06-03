@@ -27,20 +27,12 @@ void main() {
     vec2 coord=mod(texCoord*vec2(2.0, 4.0), vec2(1.0, 1.0));
 
 
-//    if (typeTexture==0){
-//
-//        outColor=texture(textureMosaic, texCoord)*vec4(result,1.0f);
-//    }if (typeTexture==1){
-//
-//    outColor=texture(textureMosaic, texCoord)*vec4(result,1.0f);
-//    }
     if (typeTexture==2){
 
         outColor=texture(textureEarth, texCoord)*vec4(result,1.0f);
     }
 
-//    else
+
 outColor=texture(textureMosaic, texCoord)*vec4(result,1.0f);
 
-   //outColor = textureColor;//only texture without light
 } 

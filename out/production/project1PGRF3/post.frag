@@ -17,8 +17,8 @@ void main() {
     vec4 sum = vec4(0.0);
     vec2 tc = texCoord;
     float blur = radius/resolution;
-    float hstep = dir.y;
-    float vstep = dir.x;
+    float hstep = dir.x;
+    float vstep = dir.y;
     vec4 textureColor = texture(textureRendered, texCoord);
     vec4 depth = texture (textureDepth, texCoord);
 
@@ -44,13 +44,10 @@ if (depth.r>0.991f){
 
 
 
-    //	if (gl_FragCoord.y < 200) {//promenna pro cast obrazovky
-    //		float grey = textureColor.r * 0.33 + textureColor.g * 0.33 + textureColor.b * 0.33;
-    //		outColor = vec4(grey, grey, grey, 1);
-    //	} else {
-    //else		outColor=textureColor;
-    //
-    //	}
+    	if (gl_FragCoord.y < 200) {//promenna pro cast obrazovky
+    		float grey = textureColor.r * 0.33 + textureColor.g * 0.33 + textureColor.b * 0.33;
+    		outColor = vec4(grey, grey, grey, 1);
+    	}
     //outColor=vec4(depth.r,0,0,1);
 
 }
